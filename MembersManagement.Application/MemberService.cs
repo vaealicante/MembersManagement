@@ -1,6 +1,6 @@
 ﻿namespace MembersManagement.Application
 {
-    public class Class1
+    public class MemberService
     {
 
     }
