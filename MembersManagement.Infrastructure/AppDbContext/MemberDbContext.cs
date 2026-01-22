@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MembersManagement.Domain;
+using MembersManagement.Domain.Entities;
 
-namespace MembersManagement.Infrastructure
+namespace MembersManagement.Infrastructure.AppDbContext
+
 {
     public class MemberDbContext : DbContext
     {
@@ -13,8 +14,10 @@ namespace MembersManagement.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Primary Key
             modelBuilder.Entity<Member>()
                 .HasKey(m => m.MemberID);
+
         }
 
         protected MemberDbContext()

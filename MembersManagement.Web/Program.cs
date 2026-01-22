@@ -1,6 +1,9 @@
-using MembersManagement.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using System;
+using MembersManagement.Application.Services;
+using MembersManagement.Domain.Interfaces;
+using MembersManagement.Infrastructure.AppDbContext;
+using MembersManagement.Infrastructure.RepositoryImplementation;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +14,11 @@ builder.Services.AddDbContext<MemberDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
+
+//Dependency Injection
+builder.Services.AddScoped<IMemberRepository, MemberRepository>();
+builder.Services.AddScoped<IMemberService, MemberService>();
+
 
 var app = builder.Build();
 
