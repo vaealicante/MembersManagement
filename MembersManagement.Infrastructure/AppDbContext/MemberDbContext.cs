@@ -20,8 +20,5 @@ namespace MembersManagement.Infrastructure.AppDbContext
 
         }
 
-        protected MemberDbContext()
-        {
-        }
     }
 }
