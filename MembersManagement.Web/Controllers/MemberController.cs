@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MembersManagement.Application.Services;
 using MembersManagement.Domain.Entities;
+using MembersManagement.Application.ApplicationInterface;
 
 namespace MembersManagement.Web.Controllers
 {

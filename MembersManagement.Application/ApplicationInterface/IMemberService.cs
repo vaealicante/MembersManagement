@@ -1,13 +1,14 @@
 ﻿using MembersManagement.Domain.Entities;
+using System.Collections.Generic;
 
-namespace MembersManagement.Application.Services
+namespace MembersManagement.Application.ApplicationInterface
 {
     public interface IMemberService
     {
         IEnumerable<Member> GetMembers();
         Member? GetMember(int id);
         void CreateMember(Member member);
-        void DeleteMember(Member member);
         void UpdateMember(Member member);
+        void DeleteMember(Member member);
     }
 }

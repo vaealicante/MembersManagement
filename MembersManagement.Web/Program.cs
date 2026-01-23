@@ -1,40 +1,34 @@
-using Microsoft.EntityFrameworkCore;
+using FluentValidation;
 using MembersManagement.Application.Services;
+using MembersManagement.Application.Validators;
+using MembersManagement.Application.ApplicationInterface;
+using MembersManagement.Domain.Entities;
 using MembersManagement.Domain.Interfaces;
 using MembersManagement.Infrastructure.AppDbContext;
 using MembersManagement.Infrastructure.RepositoryImplementation;
-
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// MVC
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<MemberDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    ));
+// Manual FluentValidation registration
+builder.Services.AddTransient<IValidator<Member>, MemberValidation>();
 
-//Dependency Injection
+// DB Context
+builder.Services.AddDbContext<MemberDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Repository & Service
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IMemberService, MemberService>();
 
-
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
 
 app.MapControllerRoute(

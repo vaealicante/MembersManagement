@@ -1,44 +1,27 @@
-﻿using System.Collections.Generic;
+﻿using MembersManagement.Application.BusinessLogic;
 using MembersManagement.Domain.Entities;
-using MembersManagement.Domain.Interfaces;
+using MembersManagement.Application.ApplicationInterface;
+using System.Collections.Generic;
 
 namespace MembersManagement.Application.Services
 {
     public class MemberService : IMemberService
     {
-        private readonly IMemberRepository _repository;
+        private readonly MemberManager _manager;
 
-        public MemberService(IMemberRepository repository)
+        public MemberService(MemberManager manager)
         {
-            _repository = repository;
+            _manager = manager;
         }
 
-        public IEnumerable<Member> GetMembers()
-        {
-            return _repository.GetAll();
-        }
+        public IEnumerable<Member> GetMembers() => _manager.GetMembers();
 
-        public Member? GetMember(int id)
-        {
-            return _repository.GetById(id);
-        }
+        public Member? GetMember(int id) => _manager.GetMember(id);
 
-        public void CreateMember(Member member)
-        {
-            _repository.Add(member);
-            _repository.SaveChanges();
-        }
+        public void CreateMember(Member member) => _manager.CreateMember(member);
 
-        public void UpdateMember(Member member)
-        {
-            _repository.Update(member);
-            _repository.SaveChanges();
-        }
+        public void UpdateMember(Member member) => _manager.UpdateMember(member);
 
-        public void DeleteMember(Member member)
-        {
-            _repository.Delete(member.MemberID);
-            _repository.SaveChanges();
-        }
+        public void DeleteMember(Member member) => _manager.DeleteMember(member.MemberID);
     }
 }
