@@ -22,6 +22,7 @@ namespace MembersManagement.Application.Services
 
         public void UpdateMember(Member member) => _manager.UpdateMember(member);
 
-        public void DeleteMember(Member member) => _manager.DeleteMember(member.MemberID);
+        public void DeleteMember(int id) => _manager.DeleteMember(id);
     }
+
 }

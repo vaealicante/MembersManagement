@@ -1,8 +1,8 @@
 using FluentValidation;
-using MembersManagement.Application.Services;
-using MembersManagement.Application.Validators;
 using MembersManagement.Application.ApplicationInterface;
 using MembersManagement.Application.BusinessLogic;
+using MembersManagement.Application.Services;
+using MembersManagement.Application.Validators;
 using MembersManagement.Domain.Entities;
 using MembersManagement.Domain.Interfaces;
 using MembersManagement.Infrastructure.AppDbContext;
@@ -11,26 +11,35 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC
 builder.Services.AddControllersWithViews();
 
-// FluentValidation registration
-builder.Services.AddTransient<IValidator<Member>, MemberValidation>();
-
-// DB Context
+// DbContext
 builder.Services.AddDbContext<MemberDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Repository
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 
-// Business Logic / Manager
-builder.Services.AddScoped<MemberManager>();  // <-- ADD THIS LINE
+// Business Logic
+builder.Services.AddScoped<MemberManager>();
 
-// Service
+// FluentValidation
+builder.Services.AddScoped<IValidator<Member>, MemberValidation>();
+
+//Service
 builder.Services.AddScoped<IMemberService, MemberService>();
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

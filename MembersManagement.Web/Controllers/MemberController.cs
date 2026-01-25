@@ -1,147 +1,131 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MembersManagement.Application.ApplicationInterface;
-using MembersManagement.Web.VMC.ViewModels;
+﻿using MembersManagement.Application.ApplicationInterface;
+using MembersManagement.Domain.Entities;
+using MembersManagement.Web.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 
-namespace MembersManagement.Web.Controllers
+public class MemberController : Controller
 {
-    public class MemberController : Controller
+    private readonly IMemberService _memberService;
+
+    public MemberController(IMemberService memberService)
     {
-        private readonly IMemberService _memberService;
+        _memberService = memberService;
+    }
 
-        public MemberController(IMemberService memberService)
-        {
-            _memberService = memberService;
-        }
-
-        // GET: List all members
-        public IActionResult Index()
-        {
-            var members = _memberService.GetMembers();
-
-            // Map domain entity to ViewModel
-            var memberVMs = members.Select(m => new MemberViewModel
+    // Index
+    public IActionResult Index()
+    {
+        var members = _memberService.GetMembers()
+            .Select(m => new MemberViewModel
             {
                 MemberID = m.MemberID,
                 FirstName = m.FirstName,
                 LastName = m.LastName,
-                BirthDate = m.BirthDate,
+                BirthDate = m.BirthDate.ToDateTime(TimeOnly.MinValue),
                 Address = m.Address,
                 Branch = m.Branch,
                 ContactNo = m.ContactNo,
                 Email = m.Email,
-                IsActive = m.IsActive,
-                DateCreated = m.DateCreated
-            }).ToList();
-
-            return View(memberVMs);
-        }
-
-        // GET: Show create form
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Create member (delegates all logic to service)
-        [HttpPost]
-        public IActionResult Create(MemberViewModel vm)
-        {
-            if (!ModelState.IsValid)
-                return View(vm);
-
-            // Delegate creation to service
-            _memberService.CreateMember(new MembersManagement.Domain.Entities.Member
-            {
-                FirstName = vm.FirstName,
-                LastName = vm.LastName,
-                BirthDate = vm.BirthDate,
-                Address = vm.Address,
-                Branch = vm.Branch,
-                ContactNo = vm.ContactNo,
-                Email = vm.Email
+                IsActive = m.IsActive
             });
 
-            return RedirectToAction(nameof(Index));
-        }
+        return View(members);
+    }
 
-        // GET: Show edit form
-        public IActionResult Edit(int id)
+    // Create GET
+    public IActionResult Create() => View();
+
+    // Create POST
+    [HttpPost]
+    public IActionResult Create(MemberViewModel vm)
+    {
+        if (!ModelState.IsValid)
+            return View(vm);
+
+        var member = new Member
         {
-            var member = _memberService.GetMember(id);
-            if (member == null) return NotFound();
+            FirstName = vm.FirstName,
+            LastName = vm.LastName,
+            BirthDate = DateOnly.FromDateTime(vm.BirthDate),
+            Address = vm.Address,
+            Branch = vm.Branch,
+            ContactNo = vm.ContactNo,
+            Email = vm.Email,
+            IsActive = vm.IsActive,
+            DateCreated = DateTime.UtcNow
+        };
 
-            var vm = new MemberViewModel
+        try
+        {
+            _memberService.CreateMember(member);
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            foreach (var error in ex.Errors)
             {
-                MemberID = member.MemberID,
-                FirstName = member.FirstName,
-                LastName = member.LastName,
-                BirthDate = member.BirthDate,
-                Address = member.Address,
-                Branch = member.Branch,
-                ContactNo = member.ContactNo,
-                Email = member.Email,
-                IsActive = member.IsActive,
-                DateCreated = member.DateCreated
-            };
-
+                ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+            }
             return View(vm);
         }
 
-        // POST: Update member (delegates to service)
-        [HttpPost]
-        public IActionResult Edit(MemberViewModel vm)
+        return RedirectToAction(nameof(Index));
+    }
+
+    // Edit GET
+    public IActionResult Edit(int id)
+    {
+        var member = _memberService.GetMember(id);
+        if (member == null) return NotFound();
+
+        var vm = new MemberViewModel
         {
-            if (!ModelState.IsValid)
-                return View(vm);
+            MemberID = member.MemberID,
+            FirstName = member.FirstName,
+            LastName = member.LastName,
+            BirthDate = member.BirthDate.ToDateTime(TimeOnly.MinValue),
+            Address = member.Address,
+            Branch = member.Branch,
+            ContactNo = member.ContactNo,
+            Email = member.Email,
+            IsActive = member.IsActive
+        };
 
-            _memberService.UpdateMember(new MembersManagement.Domain.Entities.Member
-            {
-                MemberID = vm.MemberID,
-                FirstName = vm.FirstName,
-                LastName = vm.LastName,
-                BirthDate = vm.BirthDate,
-                Address = vm.Address,
-                Branch = vm.Branch,
-                ContactNo = vm.ContactNo,
-                Email = vm.Email,
-                IsActive = vm.IsActive
-            });
+        return View(vm);
+    }
 
-            return RedirectToAction(nameof(Index));
+    // Edit POST
+    [HttpPost]
+    public IActionResult Edit(MemberViewModel vm)
+    {
+        if (!ModelState.IsValid)
+            return View(vm);
+
+        var member = _memberService.GetMember(vm.MemberID);
+        if (member == null)
+            return NotFound();
+
+        member.FirstName = vm.FirstName;
+        member.LastName = vm.LastName;
+        member.BirthDate = DateOnly.FromDateTime(vm.BirthDate);
+        member.Address = vm.Address;
+        member.Branch = vm.Branch;
+        member.ContactNo = vm.ContactNo;
+        member.Email = vm.Email;
+        member.IsActive = vm.IsActive;
+
+        try
+        {
+            _memberService.UpdateMember(member);
         }
-
-        // GET: Show delete confirmation
-        public IActionResult Delete(int id)
+        catch (FluentValidation.ValidationException ex)
         {
-            var member = _memberService.GetMember(id);
-            if (member == null) return NotFound();
-
-            var vm = new MemberViewModel
+            foreach (var error in ex.Errors)
             {
-                MemberID = member.MemberID,
-                FirstName = member.FirstName,
-                LastName = member.LastName,
-                BirthDate = member.BirthDate,
-                Address = member.Address,
-                Branch = member.Branch,
-                ContactNo = member.ContactNo,
-                Email = member.Email,
-                IsActive = member.IsActive,
-                DateCreated = member.DateCreated
-            };
-
+                ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+            }
             return View(vm);
         }
 
-        // POST: Delete member
-        [HttpPost, ActionName("Delete")]
-        public IActionResult DeleteConfirmed(int id)
-        {
-            var member = _memberService.GetMember(id);
-            if (member == null) return NotFound();
-
-            _memberService.DeleteMember(member);
-            return RedirectToAction(nameof(Index));
-        }
+        return RedirectToAction(nameof(Index));
     }
 }

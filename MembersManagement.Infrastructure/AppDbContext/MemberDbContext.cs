@@ -14,10 +14,12 @@ namespace MembersManagement.Infrastructure.AppDbContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Primary Key
             modelBuilder.Entity<Member>()
                 .HasKey(m => m.MemberID);
 
+            // Global soft-delete filter
+            modelBuilder.Entity<Member>()
+                .HasQueryFilter(m => m.IsActive);
         }
 
     }
