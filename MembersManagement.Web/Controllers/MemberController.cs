@@ -1,7 +1,8 @@
-﻿using MembersManagement.Application.ApplicationInterface;
+﻿using Microsoft.AspNetCore.Mvc;
+using MembersManagement.Application.ApplicationInterface;
 using MembersManagement.Domain.Entities;
 using MembersManagement.Web.ViewModels;
-using Microsoft.AspNetCore.Mvc;
+using FluentValidation;
 
 public class MemberController : Controller
 {
@@ -12,118 +13,44 @@ public class MemberController : Controller
         _memberService = memberService;
     }
 
-    // Index
-    public IActionResult Index()
+    public IActionResult Index(string? search)
     {
-        var members = _memberService.GetMembers()
-            .Select(m => new MemberViewModel
-            {
-                MemberID = m.MemberID,
-                FirstName = m.FirstName,
-                LastName = m.LastName,
-                BirthDate = m.BirthDate.ToDateTime(TimeOnly.MinValue),
-                Address = m.Address,
-                Branch = m.Branch,
-                ContactNo = m.ContactNo,
-                Email = m.Email,
-                IsActive = m.IsActive
-            });
+        var members = _memberService.GetMembers();
 
-        return View(members);
-    }
-
-    // Create GET
-    public IActionResult Create() => View();
-
-    // Create POST
-    [HttpPost]
-    public IActionResult Create(MemberViewModel vm)
-    {
-        if (!ModelState.IsValid)
-            return View(vm);
-
-        var member = new Member
+        if (!string.IsNullOrWhiteSpace(search))
         {
-            FirstName = vm.FirstName,
-            LastName = vm.LastName,
-            BirthDate = DateOnly.FromDateTime(vm.BirthDate),
-            Address = vm.Address,
-            Branch = vm.Branch,
-            ContactNo = vm.ContactNo,
-            Email = vm.Email,
-            IsActive = vm.IsActive,
-            DateCreated = DateTime.UtcNow
-        };
-
-        try
-        {
-            _memberService.CreateMember(member);
-        }
-        catch (FluentValidation.ValidationException ex)
-        {
-            foreach (var error in ex.Errors)
-            {
-                ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-            }
-            return View(vm);
+            members = members.Where(m =>
+                m.LastName.Contains(search, StringComparison.OrdinalIgnoreCase)
+            );
         }
 
-        return RedirectToAction(nameof(Index));
-    }
-
-    // Edit GET
-    public IActionResult Edit(int id)
-    {
-        var member = _memberService.GetMember(id);
-        if (member == null) return NotFound();
-
-        var vm = new MemberViewModel
+        var vm = members.Select(m => new MemberViewModel
         {
-            MemberID = member.MemberID,
-            FirstName = member.FirstName,
-            LastName = member.LastName,
-            BirthDate = member.BirthDate.ToDateTime(TimeOnly.MinValue),
-            Address = member.Address,
-            Branch = member.Branch,
-            ContactNo = member.ContactNo,
-            Email = member.Email,
-            IsActive = member.IsActive
-        };
+            MemberID = m.MemberID,
+            FirstName = m.FirstName,
+            LastName = m.LastName,
+            Email = m.Email,
+            BirthDate = m.BirthDate.ToDateTime(TimeOnly.MinValue),
+            Branch = m.Branch,
+            Address = m.Address,
+            ContactNo = m.ContactNo,
+            IsActive = m.IsActive
+        });
 
         return View(vm);
     }
 
-    // Edit POST
     [HttpPost]
-    public IActionResult Edit(MemberViewModel vm)
+    public IActionResult Delete(int id)
     {
-        if (!ModelState.IsValid)
-            return View(vm);
-
-        var member = _memberService.GetMember(vm.MemberID);
-        if (member == null)
-            return NotFound();
-
-        member.FirstName = vm.FirstName;
-        member.LastName = vm.LastName;
-        member.BirthDate = DateOnly.FromDateTime(vm.BirthDate);
-        member.Address = vm.Address;
-        member.Branch = vm.Branch;
-        member.ContactNo = vm.ContactNo;
-        member.Email = vm.Email;
-        member.IsActive = vm.IsActive;
-
         try
         {
-            _memberService.UpdateMember(member);
+            _memberService.DeleteMember(id); // Soft delete
+            TempData["SuccessMessage"] = "Member deleted successfully.";
         }
-        catch (FluentValidation.ValidationException ex)
+        catch (KeyNotFoundException)
         {
-            foreach (var error in ex.Errors)
-            {
-                ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-            }
-            return View(vm);
+            TempData["ErrorMessage"] = "Member not found.";
         }
 
         return RedirectToAction(nameof(Index));
