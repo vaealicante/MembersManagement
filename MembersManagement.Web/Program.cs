@@ -1,4 +1,5 @@
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using MembersManagement.Application.ApplicationInterface;
 using MembersManagement.Application.BusinessLogic;
 using MembersManagement.Application.Services;
@@ -7,11 +8,17 @@ using MembersManagement.Domain.Entities;
 using MembersManagement.Domain.Interfaces;
 using MembersManagement.Infrastructure.AppDbContext;
 using MembersManagement.Infrastructure.RepositoryImplementation;
+using MembersManagement.Web.ValidatorsVM;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddFluentValidation(fv =>
+    {
+        fv.RegisterValidatorsFromAssemblyContaining<MemberValidation>();           // Domain
+        fv.RegisterValidatorsFromAssemblyContaining<MemberViewModelValidator>();  // UI
+    });
 
 // DbContext
 builder.Services.AddDbContext<MemberDbContext>(options =>

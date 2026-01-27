@@ -1,12 +1,12 @@
 ﻿using FluentValidation;
-using MembersManagement.Domain.Entities;
+using MembersManagement.Web.ViewModels;
 using System;
 
-namespace MembersManagement.Application.Validators
+namespace MembersManagement.Web.ValidatorsVM
 {
-    public class MemberValidation : AbstractValidator<Member>
+    public class MemberViewModelValidator : AbstractValidator<MemberViewModel>
     {
-        public MemberValidation()
+        public MemberViewModelValidator()
         {
             RuleFor(m => m.FirstName)
                 .NotEmpty().WithMessage("First name is required.");
@@ -15,7 +15,8 @@ namespace MembersManagement.Application.Validators
                 .NotEmpty().WithMessage("Last name is required.");
 
             RuleFor(m => m.BirthDate)
-                .LessThanOrEqualTo(DateOnly.FromDateTime(DateTime.Today))
+                .NotEmpty().WithMessage("Birthdate is required.")
+                .Must(date => date.Date <= DateTime.Today)
                 .WithMessage("Birthdate cannot be in the future.");
 
             RuleFor(m => m.Address)
@@ -25,9 +26,7 @@ namespace MembersManagement.Application.Validators
                 .NotEmpty().WithMessage("Branch is required.");
 
             RuleFor(m => m.ContactNo)
-                .NotEmpty().WithMessage("Contact number is required.")
-                .Matches(@"^\+?\d{7,15}$")
-                .WithMessage("Contact number must be valid.");
+                .NotEmpty().WithMessage("Contact number is required.");
 
             RuleFor(m => m.Email)
                 .NotEmpty().WithMessage("Email is required.")
