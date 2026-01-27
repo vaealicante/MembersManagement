@@ -36,7 +36,6 @@ namespace MembersManagement.Application.Validators
                 .Matches(@"^\+?\d{7,15}$")
                 .WithMessage("Contact number must be valid.");
 
-            // Email required and must be valid email format
             RuleFor(m => m.Email)
                 .NotEmpty().WithMessage("Email is required.")
                 .EmailAddress().WithMessage("Invalid email format.");
