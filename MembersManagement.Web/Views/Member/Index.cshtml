@@ -39,19 +39,24 @@
 }
 
 <!-- ================= SEARCH & FILTER FORM ================= -->
-<form method="get" class="row g-3 mb-3">
+<form method="get" class="row g-6 mb-2">
 
     <!-- Search by Lastname -->
-    <div class="col-md-6">
-        <input name="search" class="form-control" placeholder="Search Lastname" value="@searchTerm" />
+    <div class="col-md-7">
+        <input name="search" 
+               class="form-control" 
+               placeholder="Search Last Name" 
+               value="@searchTerm" 
+               style="height:30px; width:300px"/>
     </div>
 
     <!-- Filter by branch -->
-    <div class="col-md-4">
-        <select name="branch" class="form-select">
-            <option value="">All Branches</option>
-
-            @foreach (var b in branches)
+    <div class="col-md-4 d-flex align-items-left">
+        <select name="branch"
+                class="form-select"
+                style="height:30px; width:300px; padding-top:0; padding-bottom:0; display:flex; align-items:center;">
+            <option value="">Branches</option>
+            @foreach (var b in branches!)
             {
                 if (b == currentBranch)
                 {
@@ -64,12 +69,16 @@
             }
         </select>
 
+        <button type="submit"
+                class="btn btn-primary ms-2"
+                style="height:30px; padding-top:0; padding-bottom:0;">
+            Filter
+        </button>
     </div>
 
-    <!-- Submit filter -->
-    <div class="col-md-2">
-        <button type="submit" class="btn btn-primary w-100">Filter</button>
-    </div>
+
+
+   
 </form>
 
 <!-- ================= CREATE BTN ================= -->
@@ -100,8 +109,8 @@
                 <td>@m.FirstName</td>
                 <td>@m.LastName</td>
                 <td>@m.BirthDate.ToString("yyyy-MM-dd")</td>
-                <td>@m.Address</td>        <!-- Corrected: show actual address -->
-                <td>@m.ContactNo</td>      <!-- Corrected: show actual contact number -->
+                <td>@m.Address</td>       
+                <td>@m.ContactNo</td>      
                 <td>@m.Branch</td>
                 <td>@m.Email</td>
                 <td>

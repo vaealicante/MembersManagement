@@ -8,18 +8,12 @@ using System.Linq;
 
 namespace MembersManagement.Application.BusinessLogic
 {
-    public class MemberManager
+    public class MemberManager(
+        IMemberRepository memberRepository,
+        IValidator<Member> validator)
     {
-        private readonly IMemberRepository _memberRepository;
-        private readonly IValidator<Member> _validator;
-
-        public MemberManager(
-            IMemberRepository memberRepository,
-            IValidator<Member> validator)
-        {
-            _memberRepository = memberRepository;
-            _validator = validator;
-        }
+        private readonly IMemberRepository _memberRepository = memberRepository;
+        private readonly IValidator<Member> _validator = validator;
 
         //Create a new member
         public void CreateMember(Member member)

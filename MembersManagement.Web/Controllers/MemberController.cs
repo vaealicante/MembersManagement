@@ -8,16 +8,10 @@ using System.Linq;
 namespace MembersManagement.Web.Controllers
 {
     // Controller class must inherit from Controller
-    public class MemberController : Controller
+    public class MemberController(IMemberService memberService) : Controller
     {
-        private readonly IMemberService _memberService;
+        private readonly IMemberService _memberService = memberService;
         private const int PageSize = 5; // members per page
-
-        // Constructor injects the service
-        public MemberController(IMemberService memberService)
-        {
-            _memberService = memberService;
-        }
 
         // ================= INDEX =================
         public IActionResult Index(string? search, string? branch, int page = 1)
@@ -28,9 +22,7 @@ namespace MembersManagement.Web.Controllers
             if (!string.IsNullOrWhiteSpace(search))
             {
                 members = members.Where(m =>
-                    m.FirstName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                    m.LastName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                    (m.Email != null && m.Email.Contains(search, StringComparison.OrdinalIgnoreCase))
+                    m.LastName.Contains(search, StringComparison.OrdinalIgnoreCase) 
                 );
             }
 
@@ -54,11 +46,11 @@ namespace MembersManagement.Web.Controllers
                     MemberID = m.MemberID,
                     FirstName = m.FirstName,
                     LastName = m.LastName,
-                    Email = m.Email,
+                    Email = m.Email!,
                     BirthDate = m.BirthDate.ToDateTime(TimeOnly.MinValue),
-                    Branch = m.Branch,
-                    Address = m.Address,
-                    ContactNo = m.ContactNo,
+                    Branch = m.Branch!,
+                    Address = m.Address!,
+                    ContactNo = m.ContactNo!,
                     IsActive = m.IsActive
                 })
                 .ToList();
@@ -151,10 +143,10 @@ namespace MembersManagement.Web.Controllers
                 FirstName = member.FirstName,
                 LastName = member.LastName,
                 BirthDate = member.BirthDate.ToDateTime(TimeOnly.MinValue),
-                Address = member.Address,
-                Branch = member.Branch,
-                ContactNo = member.ContactNo,
-                Email = member.Email,
+                Address = member.Address!,
+                Branch = member.Branch!,
+                ContactNo = member.ContactNo!,
+                Email = member.Email!,
                 IsActive = member.IsActive
             };
 

@@ -5,14 +5,9 @@ using System.Collections.Generic;
 
 namespace MembersManagement.Application.Services
 {
-    public class MemberService : IMemberService
+    public class MemberService(MemberManager manager) : IMemberService
     {
-        private readonly MemberManager _manager;
-
-        public MemberService(MemberManager manager)
-        {
-            _manager = manager;
-        }
+        private readonly MemberManager _manager = manager;
 
         public IEnumerable<Member> GetMembers() => _manager.GetMembers();
 
