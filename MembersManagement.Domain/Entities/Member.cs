@@ -4,7 +4,6 @@ namespace MembersManagement.Domain.Entities
 {
     public class Member
     {
-        [Key]
         public int MemberID { get; set; }
 
         // Core Member Data

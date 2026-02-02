@@ -1,187 +1,229 @@
 ﻿@model IEnumerable<MembersManagement.Web.ViewModels.MemberViewModel>
 
 @{
-    // Page title
+    // DATA INITIALIZATION
     ViewData["Title"] = "Members";
 
-    // Pagination values passed from controller
+    // Extract pagination and filter values passed from the Controller via ViewBag
     int currentPage = ViewBag.CurrentPage;
     int totalPages = ViewBag.TotalPages;
-
-    // Current search text (to persist value after submit)
     string searchTerm = ViewBag.SearchTerm;
-
-    // Currently selected branch filter
     string currentBranch = ViewBag.CurrentBranch;
 
-    // List of distinct branches for dropdown
-    var branches = ViewBag.Branches as List<string>;
+    // Null-coalescing: ensures the branch loop doesn't crash if the list is missing
+    var branches = ViewBag.Branches as List<string> ?? new List<string>();
+
+    // Represents the user's dropdown choice (5, 10, or 0 for 'All')
+    int pageSize = ViewBag.PageSize;
 }
 
-<h2>@ViewData["Title"]</h2>
-
-<!-- ================= SUCCESS MESSAGE ================= -->
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show">
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+@section Styles {
+    @* External CSS file link *@
+    <link rel="stylesheet" href="~/css/index/Member.css" />
+    @* Bootstrap Icons link *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 }
 
-<!-- ================= ERROR MESSAGE ================= -->
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show">
-        @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="container-fluid">
+    <h2 class="my-4">@ViewData["Title"]</h2>
+
+    @* NOTIFICATION SYSTEM *@
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @* FILTER & SEARCH FORM *@
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form id="filterForm" method="get" class="row g-3 align-items-end">
+                <input type="hidden" name="page" id="currentPageInput" value="1" />
+
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">Search</label>
+                    <input name="search" class="form-control form-control-sm"
+                           placeholder="Search Last Name..." value="@searchTerm" />
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Branch</label>
+                    <select name="branch" class="form-select form-select-sm">
+                        <option value="">All Branches</option>
+                        @foreach (var b in branches)
+                        {
+                            <option value="@b" selected="@(b == currentBranch ? "selected" : null)">@b</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-5 d-flex justify-content-start">
+                    <button type="submit" class="btn btn-primary btn-sm px-4 me-2">Submit</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm px-4">Reset</a>
+                </div>
+            </form>
+        </div>
     </div>
-}
 
-<!-- ================= SEARCH & FILTER FORM ================= -->
-<form method="get" class="row g-6 mb-2">
-
-    <!-- Search by Lastname -->
-    <div class="col-md-7">
-        <input name="search" 
-               class="form-control" 
-               placeholder="Search Last Name" 
-               value="@searchTerm" 
-               style="height:30px; width:300px"/>
+    <div class="mb-3">
+        <a asp-action="Create" class="btn btn-success btn-sm shadow-sm">
+            <i class="bi bi-plus-lg"></i> Create New Member
+        </a>
     </div>
 
-    <!-- Filter by branch -->
-    <div class="col-md-4 d-flex align-items-left">
-        <select name="branch"
-                class="form-select"
-                style="height:30px; width:300px; padding-top:0; padding-bottom:0; display:flex; align-items:center;">
-            <option value="">Branches</option>
-            @foreach (var b in branches!)
-            {
-                if (b == currentBranch)
+    @* MEMBER DATA TABLE *@
+    <div class="table-responsive shadow-sm border rounded">
+        <table class="table table-hover table-striped mb-0 custom-table">
+            <thead class="table-dark">
+                <tr>
+                    <th class="col-id">ID</th>
+                    <th class="col-name">First Name</th>
+                    <th class="col-name">Last Name</th>
+                    <th>Birth Date</th>
+                    <th class="col-address">Address</th>
+                    <th>Branch</th>
+                    <th class="col-contact">Contact Number</th>
+                    <th class="col-email">Email Address</th>
+                    <th class="text-center col-actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
                 {
-                    <option value="@b" selected>@b</option>
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-5">
+                            <i class="bi bi-search d-block mb-2" style="font-size: 2rem;"></i>
+                            No members found matching your current filters.
+                        </td>
+                    </tr>
                 }
-                else
+                @foreach (var m in Model)
                 {
-                    <option value="@b">@b</option>
-                }
-            }
-        </select>
+                    <tr>
+                        <td class="text-center fw-bold">@m.MemberID</td>
+                        <td>@m.FirstName</td>
+                        <td>@m.LastName</td>
+                        <td style="white-space: nowrap;">@m.BirthDate.ToString("MMMM dd, yyyy")</td>
+                        <td>@m.Address</td>
+                        <td>@m.Branch</td>
+                        <td>@m.ContactNo</td>
+                        <td>@m.Email</td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-2">
 
-        <button type="submit"
-                class="btn btn-primary ms-2"
-                style="height:30px; padding-top:0; padding-bottom:0;">
-            Filter
-        </button>
+                                @* EDIT ICON *@
+                                <a asp-action="Edit" asp-route-id="@m.MemberID" class="btn btn-outline-warning btn-action" title="Edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                @* VIEW ICON *@
+                                <a asp-action="Details" asp-route-id="@m.MemberID" class="btn btn-outline-info btn-action" title="View">
+                                    <i class="bi bi-list-ul"></i>
+                                </a>
+                                @* DELETE ICON *@
+                                <button type="button" class="btn btn-outline-danger btn-action"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal"
+                                        data-member-id="@m.MemberID"
+                                        data-member-name="@m.FirstName @m.LastName"
+                                        title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 
-
-
-   
-</form>
-
-<!-- ================= CREATE BTN ================= -->
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create Member</a>
-</p>
-
-<!-- ================= MEMBERS TABLE ================= -->
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Birth Date</th>
-            <th>Address</th>
-            <th>Contact Number</th>
-            <th>Branch</th>
-            <th>Email</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var m in Model)
-        {
-            <tr>
-                <td>@m.MemberID</td>
-                <td>@m.FirstName</td>
-                <td>@m.LastName</td>
-                <td>@m.BirthDate.ToString("yyyy-MM-dd")</td>
-                <td>@m.Address</td>       
-                <td>@m.ContactNo</td>      
-                <td>@m.Branch</td>
-                <td>@m.Email</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@m.MemberID" class="btn btn-warning btn-sm">Edit</a>
-                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" 
-                            data-bs-target="#deleteModal" data-member-id="@m.MemberID" 
-                            data-member-name="@m.FirstName @m.LastName">Delete</button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<!-- ================= PAGINATION ================= -->
-@if (totalPages > 1)
-{
-    <nav>
-        <ul class="pagination">
-            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage - 1 })">Previous</a>
-            </li>
-
-            @for (int i = 1; i <= totalPages; i++)
+    @* FOOTER: PAGINATION & PAGE SIZE SELECTOR *@
+    <div class="d-flex justify-content-between align-items-center mt-3 bg-light p-2 border rounded">
+        <div class="d-flex align-items-center">
+            @if (totalPages > 1)
             {
-                <li class="page-item @(i == currentPage ? "active" : "")">
-                    <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = i })">@i</a>
-                </li>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage - 1, pageSize = pageSize })">Previous</a>
+                        </li>
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = i, pageSize = pageSize })">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage + 1, pageSize = pageSize })">Next</a>
+                        </li>
+                    </ul>
+                </nav>
             }
+            else
+            {
+                <span class="text-muted small ms-2">All records displayed</span>
+            }
+        </div>
 
-            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage + 1 })">Next</a>
-            </li>
-        </ul>
-    </nav>
-}
+        <div class="d-flex align-items-center">
+            <span class="text-muted small me-3">Rows per page:</span>
+            <select name="pageSize" form="filterForm" class="form-select form-select-sm"
+                    onchange="refreshTable()" style="width: 80px;">
+                <option value="5" selected="@(pageSize == 5)">5</option>
+                <option value="10" selected="@(pageSize == 10)">10</option>
+                <option value="15" selected="@(pageSize == 15)">15</option>
+                <option value="20" selected="@(pageSize == 20)">20</option>
+                <option value="0" selected="@(pageSize == 0)">All</option>
+            </select>
+        </div>
+    </div>
+</div>
 
-<!-- ================= DELETE CONFIRMATION MODAL ================= -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
+@* DELETE CONFIRMATION MODAL *@
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="modal-body-text">Are you sure?</div>
+            <div class="modal-body">
+                <p id="modal-body-text" class="fw-bold"></p>
+                <p class="text-muted small">This action cannot be undone.</p>
+            </div>
             <div class="modal-footer">
-                <form id="deleteForm" method="post" asp-action="Delete">
+                <form asp-action="Delete" method="post">
                     <input type="hidden" id="memberIdInput" name="id" />
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger"> Delete</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger btn-sm">Confirm Delete</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ================= SCRIPTS ================= -->
 @section Scripts {
     <script>
+        const filterForm = document.getElementById('filterForm');
+
+        const refreshTable = () => {
+            document.getElementById('currentPageInput').value = 1;
+            filterForm.submit();
+        };
+
+        // Auto-submit form when branch selection changes
+        document.querySelector('select[name="branch"]').addEventListener('change', refreshTable);
+
+        // Delete Modal logic
         var deleteModal = document.getElementById('deleteModal');
         deleteModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
-
-            // Get data from button attributes
             var memberId = button.getAttribute('data-member-id');
             var memberName = button.getAttribute('data-member-name');
 
-            // Set confirmation message dynamically
             deleteModal.querySelector('#modal-body-text').textContent =
                 `Are you sure you want to delete member "${memberName}"?`;
-
             deleteModal.querySelector('#memberIdInput').value = memberId;
         });
     </script>

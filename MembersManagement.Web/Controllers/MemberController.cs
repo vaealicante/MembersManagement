@@ -7,26 +7,23 @@ using System.Linq;
 
 namespace MembersManagement.Web.Controllers
 {
-    // Controller class must inherit from Controller
     public class MemberController(IMemberService memberService) : Controller
     {
         private readonly IMemberService _memberService = memberService;
-        private const int PageSize = 5; // members per page
 
-        // ================= INDEX =================
-        public IActionResult Index(string? search, string? branch, int page = 1)
+        // ================= INDEX (With Dynamic PageSize) =================
+        public IActionResult Index(string? search, string? branch, int page = 1, int pageSize = 5)
         {
             var members = _memberService.GetMembers();
 
-            // Apply search
+            //  Apply Search
             if (!string.IsNullOrWhiteSpace(search))
             {
                 members = members.Where(m =>
-                    m.LastName.Contains(search, StringComparison.OrdinalIgnoreCase) 
-                );
+                    m.LastName.Contains(search, StringComparison.OrdinalIgnoreCase));
             }
 
-            // Apply branch filter
+            //  Apply Branch Filter
             if (!string.IsNullOrWhiteSpace(branch))
             {
                 members = members.Where(m =>
@@ -34,39 +31,55 @@ namespace MembersManagement.Web.Controllers
                     m.Branch.Equals(branch, StringComparison.OrdinalIgnoreCase));
             }
 
-            // Pagination
+            //  Pagination Calculation
             int totalMembers = members.Count();
-            int totalPages = (int)Math.Ceiling(totalMembers / (double)PageSize);
+            int originalPageSize = pageSize;
+            // Check if "All" was selected (we'll use 0 or a large number)
+            if (pageSize == 0)
+            {
+                pageSize = totalMembers > 0 ? totalMembers : 1;
+                page = 1; // Reset to page 1 if showing all
+            }
+
+            int totalPages = (int)Math.Ceiling(totalMembers / (double)pageSize);
+
+            // filter changed and made the current page invalid, reset to 1
+            if (page > totalPages) page = 1;
+            if (page < 1) page = 1;
 
             var membersToShow = members
-                .Skip((page - 1) * PageSize)
-                .Take(PageSize)
-                .Select(m => new MemberViewModel
-                {
-                    MemberID = m.MemberID,
-                    FirstName = m.FirstName,
-                    LastName = m.LastName,
-                    Email = m.Email!,
-                    BirthDate = m.BirthDate.ToDateTime(TimeOnly.MinValue),
-                    Branch = m.Branch!,
-                    Address = m.Address!,
-                    ContactNo = m.ContactNo!,
-                    IsActive = m.IsActive
-                })
-                .ToList();
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .Select(m => new MemberViewModel
+        {
+            MemberID = m.MemberID,
+            FirstName = m.FirstName,
+            LastName = m.LastName,
+            // Convert DateOnly to DateTime so the ViewModel can read it
+            BirthDate = m.BirthDate.ToDateTime(TimeOnly.MinValue),
+            Address = m.Address ?? "",
+            Branch = m.Branch ?? "",
+            ContactNo = m.ContactNo ?? "",
+            Email = m.Email ?? "",
+            IsActive = m.IsActive
+        })
+        .ToList();
 
-            // Branch dropdown
-            ViewBag.Branches = _memberService.GetMembers()
+            var branchList = _memberService.GetMembers()
                 .Where(m => m.IsActive && !string.IsNullOrEmpty(m.Branch))
                 .Select(m => m.Branch!)
                 .Distinct()
                 .OrderBy(b => b)
                 .ToList();
 
-            ViewBag.CurrentBranch = branch;
+            // Pass everything to ViewBag
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
+            ViewBag.PageSize = pageSize; // If they picked "All", this will be the total count
             ViewBag.SearchTerm = search;
+            ViewBag.CurrentBranch = branch;
+            ViewBag.Branches = branchList;
+            ViewBag.PageSize = originalPageSize;
 
             return View(membersToShow);
         }
@@ -75,13 +88,7 @@ namespace MembersManagement.Web.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.Branches = _memberService.GetMembers()
-                .Where(m => m.IsActive && !string.IsNullOrEmpty(m.Branch))
-                .Select(m => m.Branch!)
-                .Distinct()
-                .OrderBy(b => b)
-                .ToList();
-
+            PopulateBranches();
             return View();
         }
 
@@ -92,14 +99,7 @@ namespace MembersManagement.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // Repopulate Branch dropdown
-                ViewBag.Branches = _memberService.GetMembers()
-                    .Where(m => m.IsActive && !string.IsNullOrEmpty(m.Branch))
-                    .Select(m => m.Branch!)
-                    .Distinct()
-                    .OrderBy(b => b)
-                    .ToList();
-
+                PopulateBranches();
                 return View(model);
             }
 
@@ -116,27 +116,17 @@ namespace MembersManagement.Web.Controllers
             };
 
             _memberService.CreateMember(member);
-
             TempData["SuccessMessage"] = "Member created successfully.";
             return RedirectToAction(nameof(Index));
         }
 
         // ================= EDIT (GET) =================
-        // Loads the Edit page with existing member data
-        // URL: /Member/Edit/3
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            // Get member from database
             var member = _memberService.GetMember(id);
+            if (member == null) return NotFound();
 
-            // If member not found, return 404
-            if (member == null)
-            {
-                return NotFound();
-            }
-
-            // Map Entity -> ViewModel
             var model = new MemberViewModel
             {
                 MemberID = member.MemberID,
@@ -150,45 +140,24 @@ namespace MembersManagement.Web.Controllers
                 IsActive = member.IsActive
             };
 
-            // Populate Branch dropdown
-            ViewBag.Branches = _memberService.GetMembers()
-                .Where(m => m.IsActive && !string.IsNullOrEmpty(m.Branch))
-                .Select(m => m.Branch!)
-                .Distinct()
-                .OrderBy(b => b)
-                .ToList();
-
+            PopulateBranches();
             return View(model);
         }
 
         // ================= EDIT (POST) =================
-        // Saves the updated member data
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(MemberViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                // Repopulate Branch dropdown if validation fails
-                ViewBag.Branches = _memberService.GetMembers()
-                    .Where(m => m.IsActive && !string.IsNullOrEmpty(m.Branch))
-                    .Select(m => m.Branch!)
-                    .Distinct()
-                    .OrderBy(b => b)
-                    .ToList();
-
+                PopulateBranches();
                 return View(model);
             }
 
-            // Get existing member
             var member = _memberService.GetMember(model.MemberID);
+            if (member == null) return NotFound();
 
-            if (member == null)
-            {
-                return NotFound();
-            }
-
-            // Update fields
             member.FirstName = model.FirstName;
             member.LastName = model.LastName;
             member.BirthDate = DateOnly.FromDateTime(model.BirthDate);
@@ -198,9 +167,7 @@ namespace MembersManagement.Web.Controllers
             member.Email = model.Email;
             member.IsActive = model.IsActive;
 
-            // Save changes
             _memberService.UpdateMember(member);
-
             TempData["SuccessMessage"] = "Member updated successfully.";
             return RedirectToAction(nameof(Index));
         }
@@ -218,8 +185,18 @@ namespace MembersManagement.Web.Controllers
             {
                 TempData["ErrorMessage"] = "Member not found.";
             }
-
             return RedirectToAction(nameof(Index));
+        }
+
+        // Helper to avoid repeated code
+        private void PopulateBranches()
+        {
+            ViewBag.Branches = _memberService.GetMembers()
+                .Where(m => m.IsActive && !string.IsNullOrEmpty(m.Branch))
+                .Select(m => m.Branch!)
+                .Distinct()
+                .OrderBy(b => b)
+                .ToList();
         }
     }
 }

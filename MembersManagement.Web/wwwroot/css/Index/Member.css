@@ -1,0 +1,96 @@
+﻿/* --- Table Container --- */
+    .table-responsive {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e0e4e8;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        background: white;
+        margin-top: 10px;
+    }
+
+    .custom-table {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: collapse;
+    }
+
+    /* --- Header Styling --- */
+        .custom-table thead th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.8px;
+            /* Reduced from 20px to 12px for a slimmer header */
+            padding: 12px 15px;
+            border-bottom: 2px solid #edf2f7;
+        }
+
+    /* --- Body Cell Styling --- */
+        .custom-table td {
+            /* Reduced from 24px to 12px for a more compact row height */
+            padding: 12px 15px !important;
+            font-size: 0.875rem; /* Slightly smaller font for better fit */
+            color: #444;
+            border-bottom: 1px solid #f1f3f5;
+            line-height: 1.4; /* Tighter line height for multi-line text */
+            vertical-align: middle;
+        }
+
+/* --- Column Constraints --- */
+    .col-id {
+        width: 40px;
+        text-align: center;
+        font-weight: bold;
+        color: #adb5bd;
+    }
+
+    .col-name {
+        font-weight: 800; /* Fixed typo here */
+        color: #2d3748;
+    }
+
+    /* --- Hover Effect --- */
+    .custom-table tbody tr:hover {
+        background-color: #f1f8ff !important; /* Kept the clearer blue */
+        transition: background-color 0.2s ease;
+    }
+
+    /* --- Action Buttons Styling --- */
+    .btn-action {
+        width: 30px;
+        height: 30px;
+        display: inline-flex; /* Keeps buttons in a row */
+        align-items: center; /* Vertically centers the icon */
+        justify-content: center; /* Horizontally centers the icon */
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        border-width: 1.5px;
+        padding: 0; /* Remove default button padding that pushes the icon */
+        line-height: 1; /* Reset line height to prevent text-alignment interference */
+    }
+
+        /* Ensure the icon itself doesn't have default margins */
+        .btn-action i {
+            margin: 0;
+            padding: 0;
+            display: flex; /* Makes the icon itself follow flex centering */
+            font-size: 1.1rem; /* Optional: slightly increase icon size for better balance */
+        }
+
+    /* --- Last Row Polish --- */
+    .custom-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* --- Status/Branch Badge --- */
+    .branch-badge {
+        background-color: #e7f5ff;
+        color: #1971c2;
+        padding: 6px 12px; /* Slightly bigger for readability */
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        border: 1px solid #a5d8ff;
+    }
