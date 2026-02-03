@@ -34,7 +34,8 @@
 
     <div class="mb-3">
         <label asp-for="ContactNo" class="form-label"></label>
-        <input asp-for="ContactNo" class="form-control" />
+        @* Added id="contactInput" for JS and placeholder for user guidance *@
+        <input asp-for="ContactNo" id="contactInput" class="form-control" placeholder="09XXXXXXXXX" />
         <span asp-validation-for="ContactNo" class="text-danger"></span>
     </div>
 
@@ -46,9 +47,11 @@
 
     <button type="submit" class="btn btn-primary">Save</button>
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-    
-    </form>
+
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    @* Linking the specific Create JS file *@
+    <script src="~/js/MemberCreate.js"></script>
 }

@@ -1,10 +1,8 @@
 ﻿@model IEnumerable<MembersManagement.Web.ViewModels.MemberViewModel>
 
 @{
-    // DATA INITIALIZATION
     ViewData["Title"] = "Members";
 
-    // Extract pagination and filter values
     int currentPage = ViewBag.CurrentPage;
     int totalPages = ViewBag.TotalPages;
     string searchTerm = ViewBag.SearchTerm;
@@ -32,21 +30,6 @@
                 </div>
             </div>
         </div>
-
-        <script>
-            setTimeout(function () {
-                var alertElement = document.getElementById('success-alert');
-                if (alertElement) {
-                    alertElement.style.transition = "opacity 0.6s ease, transform 0.6s ease";
-                    alertElement.style.opacity = "0";
-                    alertElement.style.transform = "translateY(-20px)";
-
-                    setTimeout(function() {
-                        alertElement.remove();
-                    }, 600);
-                }
-            }, 3000);
-        </script>
     }
 
     @* FILTER & SEARCH FORM *@
@@ -66,6 +49,7 @@
                     <div class="input-group">
                         <input type="text"
                                name="branch"
+                               id="branchInput"
                                class="form-control shadow-sm"
                                list="branchOptions"
                                placeholder="Type or select branch..."
@@ -160,34 +144,20 @@
 
     @* FOOTER: PAGINATION & PAGE SIZE SELECTOR *@
     <div class="d-flex justify-content-between align-items-center mt-3 bg-light p-2 border rounded w-100">
-
-        @* LEFT SIDE: SLIDING PAGINATION *@
         <div class="flex-grow-1">
             @if (totalPages > 1)
             {
                 <nav>
                     <ul class="pagination pagination-sm mb-0">
-                        @* PREVIOUS BUTTON *@
                         <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                            @if (currentPage == 1)
-                            {
-                                <span class="page-link">Previous</span>
-                            }
-                            else
-                            {
-                                <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage - 1, pageSize = pageSize })">Previous</a>
-                            }
+                            <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage - 1, pageSize = pageSize })">Previous</a>
                         </li>
 
                         @{
                             int maxPagesToShow = 3;
                             int startPage = Math.Max(1, currentPage - 1);
                             int endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
-
-                            if (endPage - startPage + 1 < maxPagesToShow)
-                            {
-                                startPage = Math.Max(1, endPage - maxPagesToShow + 1);
-                            }
+                            if (endPage - startPage + 1 < maxPagesToShow) { startPage = Math.Max(1, endPage - maxPagesToShow + 1); }
                         }
 
                         @for (int i = startPage; i <= endPage; i++)
@@ -197,16 +167,8 @@
                             </li>
                         }
 
-                        @* NEXT BUTTON *@
                         <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                            @if (currentPage == totalPages)
-                            {
-                                <span class="page-link">Next</span>
-                            }
-                            else
-                            {
-                                <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage + 1, pageSize = pageSize })">Next</a>
-                            }
+                            <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage + 1, pageSize = pageSize })">Next</a>
                         </li>
                     </ul>
                 </nav>
@@ -217,11 +179,9 @@
             }
         </div>
 
-        @* RIGHT SIDE: ROWS PER PAGE *@
         <div class="d-flex align-items-center">
             <span class="text-muted small me-2">Rows per page:</span>
-            <select name="pageSize" form="filterForm" class="form-select form-select-sm"
-                    onchange="refreshTable()" style="width: 80px;">
+            <select name="pageSize" id="pageSizeSelector" form="filterForm" class="form-select form-select-sm" style="width: 80px;">
                 <option value="5" selected="@(pageSize == 5)">5</option>
                 <option value="10" selected="@(pageSize == 10)">10</option>
                 <option value="15" selected="@(pageSize == 15)">15</option>
@@ -232,7 +192,7 @@
     </div>
 </div>
 
-@* DELETE MODAL (Same as before) *@
+@* DELETE MODAL *@
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -256,36 +216,5 @@
 </div>
 
 @section Scripts {
-    <script>
-        const filterForm = document.getElementById('filterForm');
-
-        const refreshTable = () => {
-            document.getElementById('currentPageInput').value = 1;
-            filterForm.submit();
-        };
-
-        // FIXED: Auto-submit for Branch input datalist
-        document.querySelector('input[name="branch"]').addEventListener('input', function() {
-            const val = this.value;
-            const options = document.getElementById('branchOptions').options;
-            for (let i = 0; i < options.length; i++) {
-                if (val === options[i].value) {
-                    refreshTable();
-                    break;
-                }
-            }
-        });
-
-        // Delete Modal logic
-        var deleteModal = document.getElementById('deleteModal');
-        deleteModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var memberId = button.getAttribute('data-member-id');
-            var memberName = button.getAttribute('data-member-name');
-
-            deleteModal.querySelector('#modal-body-text').textContent =
-                `Are you sure you want to delete member "${memberName}"?`;
-            deleteModal.querySelector('#memberIdInput').value = memberId;
-        });
-    </script>
+    <script src="~/js/MemberIndex.js"></script>
 }

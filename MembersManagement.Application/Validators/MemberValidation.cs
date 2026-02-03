@@ -26,7 +26,7 @@ namespace MembersManagement.Application.Validators
 
             RuleFor(m => m.ContactNo)
                 .NotEmpty().WithMessage("Contact number is required.")
-                .Matches(@"^\+?\d{7,15}$")
+                .Matches(@"^(09|\+639)\d{9}$")
                 .WithMessage("Contact number must be valid.");
 
             RuleFor(m => m.Email)

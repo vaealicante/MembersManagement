@@ -129,21 +129,34 @@ namespace MembersManagement.Web.Controllers
                 return View(model);
             }
 
-            var member = new Member
+            try
             {
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                BirthDate = DateOnly.FromDateTime(model.BirthDate),
-                Address = model.Address,
-                Branch = model.Branch,
-                ContactNo = model.ContactNo,
-                Email = model.Email,
-                IsActive = true
-            };
+                var member = new Member
+                {
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    BirthDate = DateOnly.FromDateTime(model.BirthDate),
+                    Address = model.Address,
+                    Branch = model.Branch,
+                    ContactNo = model.ContactNo,
+                    Email = model.Email,
+                    IsActive = true
+                };
 
-            _memberService.CreateMember(member);
-            TempData["SuccessMessage"] = "Member created successfully.";
-            return RedirectToAction(nameof(Index));
+                _memberService.CreateMember(member);
+                TempData["SuccessMessage"] = "Member created successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (FluentValidation.ValidationException ex)
+            {
+                // Add FluentValidation errors to the UI ModelState
+                foreach (var error in ex.Errors)
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                }
+                PopulateBranches();
+                return View(model);
+            }
         }
 
         // ================= EDIT (GET) =================
@@ -181,21 +194,34 @@ namespace MembersManagement.Web.Controllers
                 return View(model);
             }
 
-            var member = _memberService.GetMember(model.MemberID);
-            if (member == null) return NotFound();
+            try
+            {
+                var member = _memberService.GetMember(model.MemberID);
+                if (member == null) return NotFound();
 
-            member.FirstName = model.FirstName;
-            member.LastName = model.LastName;
-            member.BirthDate = DateOnly.FromDateTime(model.BirthDate);
-            member.Address = model.Address;
-            member.Branch = model.Branch;
-            member.ContactNo = model.ContactNo;
-            member.Email = model.Email;
-            member.IsActive = model.IsActive;
+                member.FirstName = model.FirstName;
+                member.LastName = model.LastName;
+                member.BirthDate = DateOnly.FromDateTime(model.BirthDate);
+                member.Address = model.Address;
+                member.Branch = model.Branch;
+                member.ContactNo = model.ContactNo;
+                member.Email = model.Email;
+                member.IsActive = model.IsActive;
 
-            _memberService.UpdateMember(member);
-            TempData["SuccessMessage"] = "Member updated successfully.";
-            return RedirectToAction(nameof(Index));
+                _memberService.UpdateMember(member);
+                TempData["SuccessMessage"] = "Member updated successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (FluentValidation.ValidationException ex)
+            {
+                // Add FluentValidation errors to the UI ModelState
+                foreach (var error in ex.Errors)
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                }
+                PopulateBranches();
+                return View(model);
+            }
         }
 
         // ================= DELETE =================

@@ -42,8 +42,9 @@
 
     <div class="mb-3">
         <label asp-for="ContactNo" class="form-label"></label>
-        <input asp-for="ContactNo" class="form-control" />
-        <span asp-validation-for="ContactNo" class="text-danger"></span>
+        <input asp-for="ContactNo" id="contactInput" class="form-control" />
+        @* This span displays the FluentValidation error if the server rejects it *@
+        <span asp-validation-for="ContactNo" class="text-danger small"></span>
     </div>
 
     <div class="mb-3">
@@ -62,5 +63,9 @@
 </form>
 
 @section Scripts {
+    @* Includes jQuery validation for client-side checks *@
     <partial name="_ValidationScriptsPartial" />
+
+    @* Your custom edit logic *@
+    <script src="~/js/MemberEdit.js"></script>
 }
