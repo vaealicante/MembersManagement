@@ -4,6 +4,7 @@ using MembersManagement.Domain.Entities;
 using MembersManagement.Web.ViewModels;
 using System;
 using System.Linq;
+using System.Globalization;
 
 namespace MembersManagement.Web.Controllers
 {
@@ -12,18 +13,29 @@ namespace MembersManagement.Web.Controllers
         private readonly IMemberService _memberService = memberService;
 
         // ================= INDEX (With Dynamic PageSize) =================
-        public IActionResult Index(string? search, string? branch, int page = 1, int pageSize = 5)
+       public IActionResult Index(string? search, string? branch, int page = 1, int pageSize = 5)
         {
-            var members = _memberService.GetMembers();
+            var allMembers = _memberService.GetMembers();
 
-            //  Apply Search
+            // GET ALL BRANCHES (Active or Inactive) from the database
+            // Normalize to handle "Virac" vs "virac" duplicates
+            ViewBag.Branches = allMembers
+                .Where(m => !string.IsNullOrEmpty(m.Branch))
+                .Select(m => m.Branch!.Trim().ToUpper())
+                .Distinct()
+                .OrderBy(b => b)
+                .ToList();
+
+            var members = allMembers;
+
+            // 2. Apply Search
             if (!string.IsNullOrWhiteSpace(search))
             {
                 members = members.Where(m =>
                     m.LastName.Contains(search, StringComparison.OrdinalIgnoreCase));
             }
 
-            //  Apply Branch Filter
+            // 3. Apply Branch Filter
             if (!string.IsNullOrWhiteSpace(branch))
             {
                 members = members.Where(m =>
@@ -31,54 +43,44 @@ namespace MembersManagement.Web.Controllers
                     m.Branch.Equals(branch, StringComparison.OrdinalIgnoreCase));
             }
 
-            //  Pagination Calculation
+            // 4. Pagination Calculation
             int totalMembers = members.Count();
             int originalPageSize = pageSize;
-            // Check if "All" was selected (we'll use 0 or a large number)
+
             if (pageSize == 0)
             {
                 pageSize = totalMembers > 0 ? totalMembers : 1;
-                page = 1; // Reset to page 1 if showing all
+                page = 1;
             }
 
             int totalPages = (int)Math.Ceiling(totalMembers / (double)pageSize);
 
-            // filter changed and made the current page invalid, reset to 1
             if (page > totalPages) page = 1;
             if (page < 1) page = 1;
 
+            // 5. Projecting to ViewModel (Fixing 'membersToShow' context error)
             var membersToShow = members
-        .Skip((page - 1) * pageSize)
-        .Take(pageSize)
-        .Select(m => new MemberViewModel
-        {
-            MemberID = m.MemberID,
-            FirstName = m.FirstName,
-            LastName = m.LastName,
-            // Convert DateOnly to DateTime so the ViewModel can read it
-            BirthDate = m.BirthDate.ToDateTime(TimeOnly.MinValue),
-            Address = m.Address ?? "",
-            Branch = m.Branch ?? "",
-            ContactNo = m.ContactNo ?? "",
-            Email = m.Email ?? "",
-            IsActive = m.IsActive
-        })
-        .ToList();
-
-            var branchList = _memberService.GetMembers()
-                .Where(m => m.IsActive && !string.IsNullOrEmpty(m.Branch))
-                .Select(m => m.Branch!)
-                .Distinct()
-                .OrderBy(b => b)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(m => new MemberViewModel
+                {
+                    MemberID = m.MemberID,
+                    FirstName = m.FirstName,
+                    LastName = m.LastName,
+                    BirthDate = m.BirthDate.ToDateTime(TimeOnly.MinValue),
+                    Address = m.Address ?? "",
+                    Branch = m.Branch ?? "",
+                    ContactNo = m.ContactNo ?? "",
+                    Email = m.Email ?? "",
+                    IsActive = m.IsActive
+                })
                 .ToList();
 
-            // Pass everything to ViewBag
+            // 6. Pass everything to ViewBag
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
-            ViewBag.PageSize = pageSize; // If they picked "All", this will be the total count
             ViewBag.SearchTerm = search;
             ViewBag.CurrentBranch = branch;
-            ViewBag.Branches = branchList;
             ViewBag.PageSize = originalPageSize;
 
             return View(membersToShow);
@@ -102,8 +104,6 @@ namespace MembersManagement.Web.Controllers
                 ContactNo = member.ContactNo ?? "",
                 Email = member.Email ?? "",
                 IsActive = member.IsActive,
-
-                // --- MATCHING YOUR DOMAIN ENTITY ---
                 CreatedDate = member.DateCreated
             };
 
@@ -149,7 +149,6 @@ namespace MembersManagement.Web.Controllers
             }
             catch (FluentValidation.ValidationException ex)
             {
-                // Add FluentValidation errors to the UI ModelState
                 foreach (var error in ex.Errors)
                 {
                     ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
@@ -214,7 +213,6 @@ namespace MembersManagement.Web.Controllers
             }
             catch (FluentValidation.ValidationException ex)
             {
-                // Add FluentValidation errors to the UI ModelState
                 foreach (var error in ex.Errors)
                 {
                     ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
@@ -240,12 +238,13 @@ namespace MembersManagement.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // Helper to avoid repeated code
+        // Helper to ensure clean, distinct branches (Title Case)
         private void PopulateBranches()
         {
+            // Same logic for Create/Edit screens
             ViewBag.Branches = _memberService.GetMembers()
-                .Where(m => m.IsActive && !string.IsNullOrEmpty(m.Branch))
-                .Select(m => m.Branch!)
+                .Where(m => !string.IsNullOrEmpty(m.Branch))
+                .Select(m => m.Branch!.Trim().ToUpper())
                 .Distinct()
                 .OrderBy(b => b)
                 .ToList();

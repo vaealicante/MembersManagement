@@ -17,9 +17,7 @@ namespace MembersManagement.Infrastructure.AppDbContext
             modelBuilder.Entity<Member>()
                 .HasKey(m => m.MemberID);
 
-            // Global soft-delete filter
-            modelBuilder.Entity<Member>()
-                .HasQueryFilter(m => m.IsActive);
+            
         }
 
     }

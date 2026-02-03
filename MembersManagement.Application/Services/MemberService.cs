@@ -11,6 +11,8 @@ namespace MembersManagement.Application.Services
 
         public IEnumerable<Member> GetMembers() => _manager.GetMembers();
 
+        public IEnumerable<Member> GetDashboardData() => _manager.GetAllMembersRaw();
+
         public Member? GetMember(int id) => _manager.GetMember(id);
 
         public void CreateMember(Member member) => _manager.CreateMember(member);

@@ -1,57 +1,89 @@
 ﻿@model MembersManagement.Web.ViewModels.MemberViewModel
 
-<form asp-action="Create" method="post" novalidate>
+@{
+    ViewData["Title"] = "Create New Member";
+}
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-dark text-white py-3">
+                    <h5 class="card-title mb-0"><i class="bi bi-person-plus me-2"></i> @ViewData["Title"]</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post" novalidate>
 
-    <div class="mb-3">
-        <label asp-for="FirstName" class="form-label"></label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
-    </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label small fw-bold text-uppercase text-muted"></label>
+                                <input asp-for="FirstName" class="form-control" placeholder="Enter first name" />
+                                <span asp-validation-for="FirstName" class="text-danger small"></span>
+                            </div>
 
-    <div class="mb-3">
-        <label asp-for="LastName" class="form-label"></label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
-    </div>
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label small fw-bold text-uppercase text-muted"></label>
+                                <input asp-for="LastName" class="form-control" placeholder="Enter last name" />
+                                <span asp-validation-for="LastName" class="text-danger small"></span>
+                            </div>
 
-    <div class="mb-3">
-        <label asp-for="BirthDate" class="form-label"></label>
-        <input asp-for="BirthDate" type="date" class="form-control" />
-        <span asp-validation-for="BirthDate" class="text-danger"></span>
-    </div>
+                            <div class="col-md-6">
+                                <label asp-for="BirthDate" class="form-label small fw-bold text-uppercase text-muted"></label>
+                                <input asp-for="BirthDate" type="date" class="form-control" />
+                                <span asp-validation-for="BirthDate" class="text-danger small"></span>
+                            </div>
 
-    <div class="mb-3">
-        <label asp-for="Address" class="form-label"></label>
-        <input asp-for="Address" class="form-control" />
-        <span asp-validation-for="Address" class="text-danger"></span>
-    </div>
+                            <div class="col-md-6">
+                                <label asp-for="Branch" class="form-label small fw-bold text-uppercase text-muted"></label>
+                                <input asp-for="Branch" class="form-control" list="branchOptions" placeholder="Select or type branch" />
+                                <datalist id="branchOptions">
+                                    @if (ViewBag.Branches != null)
+                                    {
+                                        foreach (var b in ViewBag.Branches)
+                                        {
+                                            <option value="@b"></option>
+                                        }
+                                    }
+                                </datalist>
+                                <span asp-validation-for="Branch" class="text-danger small"></span>
+                            </div>
 
-    <div class="mb-3">
-        <label asp-for="Branch" class="form-label"></label>
-        <input asp-for="Branch" class="form-control" />
-        <span asp-validation-for="Branch" class="text-danger"></span>
-    </div>
+                            <div class="col-md-6">
+                                <label asp-for="ContactNo" class="form-label small fw-bold text-uppercase text-muted"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="bi bi-telephone text-muted"></i></span>
+                                    <input asp-for="ContactNo" id="contactInput" class="form-control" placeholder="09XXXXXXXXX" />
+                                </div>
+                                <span asp-validation-for="ContactNo" class="text-danger small"></span>
+                            </div>
 
-    <div class="mb-3">
-        <label asp-for="ContactNo" class="form-label"></label>
-        @* Added id="contactInput" for JS and placeholder for user guidance *@
-        <input asp-for="ContactNo" id="contactInput" class="form-control" placeholder="09XXXXXXXXX" />
-        <span asp-validation-for="ContactNo" class="text-danger"></span>
-    </div>
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label small fw-bold text-uppercase text-muted"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="bi bi-envelope text-muted"></i></span>
+                                    <input asp-for="Email" class="form-control" placeholder="example@mail.com" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
 
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
+                            <div class="col-12">
+                                <label asp-for="Address" class="form-label small fw-bold text-uppercase text-muted"></label>
+                                <textarea asp-for="Address" class="form-control" rows="2" placeholder="Enter complete address"></textarea>
+                                <span asp-validation-for="Address" class="text-danger small"></span>
+                            </div>
+                        </div>
 
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        <hr class="my-4 text-muted">
 
-</form>
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-3 shadow-sm">
+                                <i class="bi bi-save me-2"></i>Save Member
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    @* Linking the specific Create JS file *@
     <script src="~/js/MemberCreate.js"></script>
 }

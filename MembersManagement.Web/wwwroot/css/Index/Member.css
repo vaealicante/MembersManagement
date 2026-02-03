@@ -53,7 +53,6 @@
 
 .col-contact {
     width: 150px;
-    text-align: center;
 }
 
 .col-email {
@@ -143,5 +142,46 @@
         transform: translate(-50%, 0); /* End at its natural top: 25px position */
         opacity: 1;
     }
+}
+
+/* --- Unified Search & Filter Sizing --- */
+/* Forces Search, Select, and Buttons to match perfectly */
+.filter-container .form-control,
+.filter-container .form-select,
+.filter-container .btn,
+.filter-container .input-group-text {
+    height: 40px !important; /* Set a fixed height */
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Container for the filter elements */
+.filter-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+/* --- Validation Icon Removal --- */
+/* Removes the checkmark/exclamation icons while keeping the red/green borders */
+.form-control.is-valid,
+.form-control.is-invalid,
+.form-select.is-valid,
+.form-select.is-invalid {
+    background-image: none !important;
+    padding-right: 0.75rem !important; /* Resets the space where the icon used to be */
+}
+
+/* Ensures the border colors remain clear for the user */
+.is-invalid {
+    border-color: #dc3545 !important; /* Bootstrap Red */
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.1) !important;
+}
+
+.is-valid {
+    border-color: #198754 !important; /* Bootstrap Green */
 }
 

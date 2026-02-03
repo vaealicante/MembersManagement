@@ -1,6 +1,7 @@
 ﻿using MembersManagement.Domain.Entities;
 using MembersManagement.Domain.Interfaces;
 using MembersManagement.Infrastructure.AppDbContext;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +17,7 @@ namespace MembersManagement.Infrastructure.RepositoryImplementation
         }
 
         public IEnumerable<Member> GetAll()
-            => _context.Members.ToList();
+    => _context.Members.AsNoTracking().ToList();
 
         public Member? GetById(int id)
             => _context.Members.Find(id);

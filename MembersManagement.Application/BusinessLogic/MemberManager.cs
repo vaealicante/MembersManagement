@@ -59,5 +59,10 @@ namespace MembersManagement.Application.BusinessLogic
             _memberRepository.Update(member);
             _memberRepository.SaveChanges();
         }
+
+        public IEnumerable<Member> GetAllMembersRaw()
+        {
+            return _memberRepository.GetAll(); // Returns everyone (Active and Inactive)
+        }
     }
 }
