@@ -1,0 +1,59 @@
+﻿/* Container and Card Styles */
+.details-card {
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border: none;
+}
+
+/* Header Banner */
+.profile-header {
+    background: linear-gradient(135deg, #212529 0%, #343a40 100%);
+    padding: 2.5rem;
+    color: white;
+}
+
+/* Text Styling */
+.info-label {
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    color: #6c757d;
+    margin-bottom: 2px;
+}
+
+.info-value {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0;
+}
+
+/* Sections */
+.section-divider {
+    border-left: 4px solid #ffc107;
+    padding-left: 15px;
+    margin: 20px 0;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: #495057;
+}
+
+/* Icon Containers */
+.icon-box {
+    width: 40px;
+    height: 40px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: #495057;
+}
+
+/* Avatar Styling */
+.avatar-circle {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+    font-weight: bold;
+}

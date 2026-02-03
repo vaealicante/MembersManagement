@@ -1,160 +1,147 @@
-﻿/* --- Table Container --- */
-    .table-responsive {
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid #e0e4e8;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        background: white;
-        margin-top: 10px;
-    }
+﻿﻿ /* --- Table Container --- */
+.table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e0e4e8;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    background: white;
+    margin-top: 10px;
+}
 
-    .custom-table {
-        width: 100%;
-        margin-bottom: 0;
-        border-collapse: collapse;
-    }
+.custom-table {
+    table-layout: fixed !important; /* Forces columns to stay at fixed widths */
+    width: 100% !important;
+    margin-bottom: 0;
+    border-collapse: collapse;
+    overflow: hidden;
+}
 
     /* --- Header Styling --- */
-        .custom-table thead th {
-            background-color: #f8f9fa;
-            color: #495057;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.8px;
-            /* Reduced from 20px to 12px for a slimmer header */
-            padding: 12px 15px;
-            border-bottom: 2px solid #edf2f7;
-        }
+    .custom-table thead th {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
     /* --- Body Cell Styling --- */
-        .custom-table td {
-            /* Reduced from 24px to 12px for a more compact row height */
-            padding: 12px 15px !important;
-            font-size: 0.875rem; /* Slightly smaller font for better fit */
-            color: #444;
-            border-bottom: 1px solid #f1f3f5;
-            line-height: 1.4; /* Tighter line height for multi-line text */
-            vertical-align: middle;
-        }
+    .custom-table td {
+        padding: 12px 15px !important;
+        font-size: 0.800rem;
+        color: #444;
+        border-bottom: 1px solid #f1f3f5;
+        vertical-align: middle;
+    }
 
 /* --- Column Constraints --- */
-    .col-id {
-        width: 40px;
-        text-align: center;
-        font-weight: bold;
-        color: #adb5bd;
-    }
+.col-id {
+    width:50px;
+    text-align: center;
 
-    .col-name {
-        font-weight: 800; /* Fixed typo here */
-        color: #2d3748;
-    }
+}
+
+.col-name {
+    font-weight: 700;
+
+}
+.col-address {
+    width: 250px;
+}
+/* Address takes remaining space */
+.col-branch {
+    width: 130px;
+}
+
+.col-contact {
+    width: 150px;
+    text-align: center;
+}
+
+.col-email {
+    width: 180px;
+}
+
+.col-actions {
+    width: 130px;
+}
 
     /* --- Hover Effect --- */
     .custom-table tbody tr:hover {
-        background-color: #f1f8ff !important; /* Kept the clearer blue */
-        transition: background-color 0.2s ease;
-    }
-
-    /* --- Action Buttons Styling --- */
-    .btn-action {
-        width: 30px;
-        height: 30px;
-        display: inline-flex; /* Keeps buttons in a row */
-        align-items: center; /* Vertically centers the icon */
-        justify-content: center; /* Horizontally centers the icon */
-        border-radius: 10px;
-        transition: all 0.2s ease;
-        border-width: 1.5px;
-        padding: 0; /* Remove default button padding that pushes the icon */
-        line-height: 1; /* Reset line height to prevent text-alignment interference */
-    }
-
-        /* Ensure the icon itself doesn't have default margins */
-        .btn-action i {
-            margin: 0;
-            padding: 0;
-            display: flex; /* Makes the icon itself follow flex centering */
-            font-size: 1.1rem; /* Optional: slightly increase icon size for better balance */
-        }
-
-    /* --- Last Row Polish --- */
-    .custom-table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    /* --- Status/Branch Badge --- */
-    .branch-badge {
-        background-color: #e7f5ff;
-        color: #1971c2;
-        padding: 6px 12px; /* Slightly bigger for readability */
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.8rem;
-        border: 1px solid #a5d8ff;
-    }
-
-/* --- NEW: Floating Alert Notification System --- */
-.alert-container {
-    position: fixed;
-    top: 25px;
-    right: 25px;
-    z-index: 10000;
-    min-width: 280px;
-    /* This makes it "pop" into view from the right */
-    animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background-color: #f1f8ff !important; /* Kept the clearer blue */
+    transition: background-color 0.2s ease;
 }
 
-.alert-success {
-    background-color: #d1e7dd;
-    color: #0f5132;
-    border-left: 5px solid #198754 !important;
-    padding: 15px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+/* --- Action Buttons Styling --- */
+.btn-action {
+    width: 30px;
+    height: 30px;
+    display: inline-flex; /* Keeps buttons in a row */
+    align-items: center; /* Vertically centers the icon */
+    justify-content: center; /* Horizontally centers the icon */
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    border-width: 1.5px;
+    padding: 0; /* Remove default button padding that pushes the icon */
+    line-height: 1; /* Reset line height to prevent text-alignment interference */
 }
 
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
+    /* Ensure the icon itself doesn't have default margins */
+    .btn-action i {
+        margin: 0;
+        padding: 0;
+        display: flex; /* Makes the icon itself follow flex centering */
+        font-size: 1.1rem; /* Optional: slightly increase icon size for better balance */
     }
 
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+/* --- Last Row Polish --- */
+.custom-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* --- Status/Branch Badge --- */
+.branch-badge {
+    background-color: #e7f5ff;
+    color: #1971c2;
+    padding: 6px 12px; /* Slightly bigger for readability */
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    border: 1px solid #a5d8ff;
+    text-align: center;
 }
 
 /* --- NEW: Floating Alert Notification System --- */
 .alert-container {
     position: fixed;
     top: 25px;
-    right: 25px;
+    left: 50%; /* Move to horizontal middle */
+    transform: translateX(-50%); /* Offset by half its own width to perfectly center */
     z-index: 10000;
-    min-width: 280px;
-    /* This makes it "pop" into view from the right */
-    animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    min-width: 320px;
+    /* Changed animation to drop down from the top */
+    animation: slideInDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .alert-success {
     background-color: #d1e7dd;
     color: #0f5132;
+    /* Changed to border-bottom or kept as left for accent */
     border-left: 5px solid #198754 !important;
-    padding: 15px 20px;
+    padding: 15px 25px;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    text-align: center; /* Centers the text inside the alert */
 }
 
-@keyframes slideInRight {
+/* New Animation for Top-Center entry */
+@keyframes slideInDown {
     from {
-        transform: translateX(100%);
+        transform: translate(-50%, -100%); /* Start above the screen */
         opacity: 0;
     }
 
     to {
-        transform: translateX(0);
+        transform: translate(-50%, 0); /* End at its natural top: 25px position */
         opacity: 1;
     }
 }
+

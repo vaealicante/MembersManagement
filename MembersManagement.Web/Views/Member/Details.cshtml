@@ -1,73 +1,113 @@
 ﻿@model MembersManagement.Web.ViewModels.MemberViewModel
 
-<div class="container mt-4">
-    <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
-        <div class="card-header bg-dark text-white p-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Member Information</h5>
-            @* Added Status Badge here *@
-            <span class="badge @(Model.IsActive ? "bg-success" : "bg-danger")">
-                @(Model.IsActive ? "Active" : "Inactive")
-            </span>
-        </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/MemberDetails.css" />
+}
 
-        <div class="card-body p-4">
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <label class="text-muted small text-uppercase fw-bold">Full Name</label>
-                    <p class="fs-5">@Model.FirstName @Model.LastName</p>
-                </div>
-                <div class="col-md-6">
-                    <label class="text-muted small text-uppercase fw-bold">Member ID</label>
-                    <p class="fs-5 text-secondary">#@Model.MemberID</p>
-                </div>
-            </div>
+<div class="container py-5 ">
+    <div class="card details-card overflow-hidden">
 
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <label class="text-muted small text-uppercase fw-bold">Birth Date</label>
-                    <p>@Model.BirthDate.ToString("MMMM dd, yyyy")</p>
+        <div class="profile-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="d-flex justify-content-between align-items-start pt-4">
+                    <div class="ms-5">
+                        <h2 class="mb-1 fw-bold">@Model.FirstName @Model.LastName</h2>
+                        <p class="mb-0 opacity-75">
+                            <i class="bi bi-hash"></i> Member ID: @Model.MemberID &nbsp; | &nbsp;
+                            <i class="bi bi-geo-alt"></i> @Model.Branch Branch
+                        </p>
+                    </div>
                 </div>
-                @* --- AGE ADDED HERE --- *@
-                <div class="col-md-4">
-                    <label class="text-muted small text-uppercase fw-bold">Age</label>
-                    <p>@Model.Age </p>
-                </div>
-                <div class="col-md-4">
-                    <label class="text-muted small text-uppercase fw-bold">Branch</label>
-                    <div><span class="text-dark">@Model.Branch</span></div>
-                </div>
-            </div>
-
-            <div class="row mb-4 border-top pt-4">
-                <div class="col-md-4">
-                    <label class="text-muted small text-uppercase fw-bold">Email Address</label>
-                    <p>@Model.Email</p>
-                </div>
-                <div class="col-md-4">
-                    <label class="text-muted small text-uppercase fw-bold">Contact Number</label>
-                    <p>@Model.ContactNo</p>
-                </div>
-                @* --- MEMBER SINCE MOVED INSIDE THE ROW --- *@
-                <div class="col-md-4">
-                    <label class="text-muted small text-uppercase fw-bold">Member Since</label>
-                    <p class="mb-0">
-                        <i class="bi bi-calendar-check me-1 text-secondary"></i>
-                        @Model.CreatedDate.ToString("MMM dd, yyyy")
-                    </p>
-                </div>
-            </div>
-
-            <div class="row border-top pt-4">
-                <div class="col-12">
-                    <label class="text-muted small text-uppercase fw-bold">Home Address</label>
-                    <p class="mb-0">@Model.Address</p>
+                <div class="text-end justify-content-between align-items-start pt-4 p-5">
+                    <span class="badge rounded-pill @(Model.IsActive ? "bg-success" : "bg-danger") shadow-sm px-2 py-2">
+                        <i class="bi @(Model.IsActive ? "bi-check-circle" : "bi-x-circle") me-1"></i>
+                        @(Model.IsActive ? "ACTIVE ACCOUNT" : "INACTIVE")
+                    </span>
                 </div>
             </div>
         </div>
 
-        <div class="card-footer bg-light p-3 text-end">
-            <a asp-action="Index" class="btn btn-outline-secondary px-4">Back to List</a>
-            <a asp-action="Edit" asp-route-id="@Model.MemberID" class="btn btn-warning px-4">Edit Details</a>
+        <div class="card-body p-5">
+            <div class="row">
+                <div class="col-lg-7 pe-lg-5 border-end">
+                    <div class="section-divider">Personal Information</div>
+
+                    <div class="row g-4">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box"><i class="bi bi-calendar3"></i></div>
+                                <div>
+                                    <p class="info-label text-uppercase fw-bold">Birth Date</p>
+                                    <p class="info-value">@Model.BirthDate.ToString("MMMM dd, yyyy")</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box"><i class="bi bi-person-badge"></i></div>
+                                <div>
+                                    <p class="info-label text-uppercase fw-bold">Current Age</p>
+                                    <p class="info-value">@Model.Age Years Old</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box"><i class="bi bi-house-door"></i></div>
+                                <div>
+                                    <p class="info-label text-uppercase fw-bold">Home Address</p>
+                                    <p class="info-value">@Model.Address</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider mt-5">Contact Details</div>
+                    <div class="row g-4">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box"><i class="bi bi-envelope"></i></div>
+                                <div>
+                                    <p class="info-label text-uppercase fw-bold">Email Address</p>
+                                    <p class="info-value">@Model.Email</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box"><i class="bi bi-telephone"></i></div>
+                                <div>
+                                    <p class="info-label text-uppercase fw-bold">Contact Number</p>
+                                    <p class="info-value">@Model.ContactNo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5 ps-lg-5">
+                    <div class="section-divider">System Metadata</div>
+                    <div class="bg-light rounded-3 p-4">
+                        <div class="mb-4">
+                            <p class="info-label text-uppercase fw-bold">Member Since</p>
+                            <h4 class="text-primary fw-bold">@Model.CreatedDate.ToString("MMMM dd, yyyy")</h4>
+                        </div>
+                        <hr>
+                        <div class="d-grid gap-2 mt-4">
+                            <a asp-action="Edit" asp-route-id="@Model.MemberID" class="btn btn-warning fw-bold py-2 shadow-sm">
+                                <i class="bi bi-pencil-square me-2"></i> Edit Profile
+                            </a>
+                            <a asp-action="Index" class="btn btn-outline-secondary py-2">
+                                <i class="bi bi-arrow-left me-2"></i> Back to Directory
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/MemberDetails.js"></script>
+}

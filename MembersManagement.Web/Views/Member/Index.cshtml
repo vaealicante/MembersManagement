@@ -4,23 +4,17 @@
     // DATA INITIALIZATION
     ViewData["Title"] = "Members";
 
-    // Extract pagination and filter values passed from the Controller via ViewBag
+    // Extract pagination and filter values
     int currentPage = ViewBag.CurrentPage;
     int totalPages = ViewBag.TotalPages;
     string searchTerm = ViewBag.SearchTerm;
     string currentBranch = ViewBag.CurrentBranch;
-
-    // Null-coalescing: ensures the branch loop doesn't crash if the list is missing
     var branches = ViewBag.Branches as List<string> ?? new List<string>();
-
-    // Represents the user's dropdown choice (5, 10, or 0 for 'All')
     int pageSize = ViewBag.PageSize;
 }
 
 @section Styles {
-    @* External CSS file link *@
     <link rel="stylesheet" href="~/css/index/Member.css" />
-    @* Bootstrap Icons link *@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 }
 
@@ -43,10 +37,9 @@
             setTimeout(function () {
                 var alertElement = document.getElementById('success-alert');
                 if (alertElement) {
-                    // Smooth fade out
                     alertElement.style.transition = "opacity 0.6s ease, transform 0.6s ease";
                     alertElement.style.opacity = "0";
-                    alertElement.style.transform = "translateY(-20px)"; // Optional: slides up slightly while fading
+                    alertElement.style.transform = "translateY(-20px)";
 
                     setTimeout(function() {
                         alertElement.remove();
@@ -76,15 +69,12 @@
                                class="form-control shadow-sm"
                                list="branchOptions"
                                placeholder="Type or select branch..."
-                               value="@ViewBag.CurrentBranch" />
+                               value="@currentBranch" />
 
                         <datalist id="branchOptions">
-                            @if (ViewBag.Branches != null)
+                            @foreach (var b in branches)
                             {
-                                foreach (var b in (List<string>)ViewBag.Branches)
-                                {
-                                    <option value="@b"></option>
-                                }
+                                <option value="@b"></option>
                             }
                         </datalist>
 
@@ -95,7 +85,6 @@
                 </div>
 
                 <div class="col-md-5 d-flex justify-content-start">
-                    @*<button type="submit" class="btn btn-primary btn-sm px-4 me-2">Submit</button>*@
                     <a asp-action="Index" class="btn btn-outline-secondary btn-sm px-4">Reset</a>
                 </div>
             </form>
@@ -116,9 +105,9 @@
                     <th class="col-id">ID</th>
                     <th class="col-name">First Name</th>
                     <th class="col-name">Last Name</th>
-                    <th>Birth Date</th>
+                    <th class="col-date">Birth Date</th>
                     <th class="col-address">Address</th>
-                    <th>Branch</th>
+                    <th class="col-branch">Branch</th>
                     <th class="col-contact">Contact Number</th>
                     <th class="col-email">Email Address</th>
                     <th class="text-center col-actions">Actions</th>
@@ -130,24 +119,7 @@
                     <tr>
                         <td colspan="9" class="text-center text-muted py-5">
                             <i class="bi bi-search d-block mb-2" style="font-size: 2rem;"></i>
-
-                            @{
-                                string msg = "No members match.";
-
-                                var lastNameFilter = ViewData["SearchLastName"] as string;
-                                var branchFilter = ViewData["SelectedBranch"] as string;
-
-                                if (!string.IsNullOrWhiteSpace(lastNameFilter))
-                                {
-                                    msg = $"No members match '{lastNameFilter}'.";
-                                }
-                                else if (!string.IsNullOrWhiteSpace(branchFilter))
-                                {
-                                    msg = $"No members match in branch '{branchFilter}'.";
-                                }
-                            }
-
-                            @msg
+                            No members match your criteria.
                         </td>
                     </tr>
                 }
@@ -155,25 +127,21 @@
                 {
                     <tr>
                         <td class="text-center fw-bold">@m.MemberID</td>
-                        <td>@m.FirstName</td>
-                        <td>@m.LastName</td>
-                        <td style="white-space: nowrap;">@m.BirthDate.ToString("MMMM dd, yyyy")</td>
-                        <td>@m.Address</td>
-                        <td>@m.Branch</td>
-                        <td>@m.ContactNo</td>
-                        <td>@m.Email</td>
+                        <td title="@m.FirstName">@m.FirstName</td>
+                        <td title="@m.LastName">@m.LastName</td>
+                        <td>@m.BirthDate.ToString("MM-dd-yyyy")</td>
+                        <td title="@m.Address">@m.Address</td>
+                        <td title="@m.Branch">@m.Branch</td>
+                        <td title="@m.ContactNo">@m.ContactNo</td>
+                        <td title="@m.Email">@m.Email</td>
                         <td class="text-center">
                             <div class="d-flex justify-content-center gap-2">
-
-                                @* EDIT ICON *@
                                 <a asp-action="Edit" asp-route-id="@m.MemberID" class="btn btn-outline-warning btn-action" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-                                @* VIEW ICON *@
                                 <a asp-action="Details" asp-route-id="@m.MemberID" class="btn btn-outline-info btn-action" title="View">
                                     <i class="bi bi-list-ul"></i>
                                 </a>
-                                @* DELETE ICON *@
                                 <button type="button" class="btn btn-outline-danger btn-action"
                                         data-bs-toggle="modal"
                                         data-bs-target="#deleteModal"
@@ -191,23 +159,54 @@
     </div>
 
     @* FOOTER: PAGINATION & PAGE SIZE SELECTOR *@
-    <div class="d-flex justify-content-between align-items-center mt-3 bg-light p-2 border rounded">
-        <div class="d-flex align-items-center">
+    <div class="d-flex justify-content-between align-items-center mt-3 bg-light p-2 border rounded w-100">
+
+        @* LEFT SIDE: SLIDING PAGINATION *@
+        <div class="flex-grow-1">
             @if (totalPages > 1)
             {
                 <nav>
                     <ul class="pagination pagination-sm mb-0">
+                        @* PREVIOUS BUTTON *@
                         <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage - 1, pageSize = pageSize })">Previous</a>
+                            @if (currentPage == 1)
+                            {
+                                <span class="page-link">Previous</span>
+                            }
+                            else
+                            {
+                                <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage - 1, pageSize = pageSize })">Previous</a>
+                            }
                         </li>
-                        @for (int i = 1; i <= totalPages; i++)
+
+                        @{
+                            int maxPagesToShow = 3;
+                            int startPage = Math.Max(1, currentPage - 1);
+                            int endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+
+                            if (endPage - startPage + 1 < maxPagesToShow)
+                            {
+                                startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+                            }
+                        }
+
+                        @for (int i = startPage; i <= endPage; i++)
                         {
                             <li class="page-item @(i == currentPage ? "active" : "")">
                                 <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = i, pageSize = pageSize })">@i</a>
                             </li>
                         }
+
+                        @* NEXT BUTTON *@
                         <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage + 1, pageSize = pageSize })">Next</a>
+                            @if (currentPage == totalPages)
+                            {
+                                <span class="page-link">Next</span>
+                            }
+                            else
+                            {
+                                <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage + 1, pageSize = pageSize })">Next</a>
+                            }
                         </li>
                     </ul>
                 </nav>
@@ -218,8 +217,9 @@
             }
         </div>
 
+        @* RIGHT SIDE: ROWS PER PAGE *@
         <div class="d-flex align-items-center">
-            <span class="text-muted small me-3">Rows per page:</span>
+            <span class="text-muted small me-2">Rows per page:</span>
             <select name="pageSize" form="filterForm" class="form-select form-select-sm"
                     onchange="refreshTable()" style="width: 80px;">
                 <option value="5" selected="@(pageSize == 5)">5</option>
@@ -232,7 +232,7 @@
     </div>
 </div>
 
-@* DELETE CONFIRMATION MODAL *@
+@* DELETE MODAL (Same as before) *@
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -264,8 +264,17 @@
             filterForm.submit();
         };
 
-        // Auto-submit form when branch selection changes
-        document.querySelector('select[name="branch"]').addEventListener('change', refreshTable);
+        // FIXED: Auto-submit for Branch input datalist
+        document.querySelector('input[name="branch"]').addEventListener('input', function() {
+            const val = this.value;
+            const options = document.getElementById('branchOptions').options;
+            for (let i = 0; i < options.length; i++) {
+                if (val === options[i].value) {
+                    refreshTable();
+                    break;
+                }
+            }
+        });
 
         // Delete Modal logic
         var deleteModal = document.getElementById('deleteModal');
