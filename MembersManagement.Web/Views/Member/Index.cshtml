@@ -30,10 +30,30 @@
     @* NOTIFICATION SYSTEM *@
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show shadow-sm">
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div id="success-alert" class="alert-container">
+            <div class="alert alert-success shadow-sm border-0">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <div>@TempData["SuccessMessage"]</div>
+                </div>
+            </div>
         </div>
+
+        <script>
+            setTimeout(function () {
+                var alertElement = document.getElementById('success-alert');
+                if (alertElement) {
+                    // Smooth fade out
+                    alertElement.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+                    alertElement.style.opacity = "0";
+                    alertElement.style.transform = "translateY(-20px)"; // Optional: slides up slightly while fading
+
+                    setTimeout(function() {
+                        alertElement.remove();
+                    }, 600);
+                }
+            }, 3000);
+        </script>
     }
 
     @* FILTER & SEARCH FORM *@
@@ -43,24 +63,39 @@
                 <input type="hidden" name="page" id="currentPageInput" value="1" />
 
                 <div class="col-md-4">
-                    <label class="form-label small fw-bold">Search</label>
+                    <label class="small text-muted fw-bold text-uppercase">SEARCH</label>
                     <input name="search" class="form-control form-control-sm"
                            placeholder="Search Last Name..." value="@searchTerm" />
                 </div>
 
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Branch</label>
-                    <select name="branch" class="form-select form-select-sm">
-                        <option value="">All Branches</option>
-                        @foreach (var b in branches)
-                        {
-                            <option value="@b" selected="@(b == currentBranch ? "selected" : null)">@b</option>
-                        }
-                    </select>
+                <div class="col-md-3">
+                    <label class="small text-muted fw-bold text-uppercase">Branch</label>
+                    <div class="input-group">
+                        <input type="text"
+                               name="branch"
+                               class="form-control shadow-sm"
+                               list="branchOptions"
+                               placeholder="Type or select branch..."
+                               value="@ViewBag.CurrentBranch" />
+
+                        <datalist id="branchOptions">
+                            @if (ViewBag.Branches != null)
+                            {
+                                foreach (var b in (List<string>)ViewBag.Branches)
+                                {
+                                    <option value="@b"></option>
+                                }
+                            }
+                        </datalist>
+
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="bi bi-funnel"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="col-md-5 d-flex justify-content-start">
-                    <button type="submit" class="btn btn-primary btn-sm px-4 me-2">Submit</button>
+                    @*<button type="submit" class="btn btn-primary btn-sm px-4 me-2">Submit</button>*@
                     <a asp-action="Index" class="btn btn-outline-secondary btn-sm px-4">Reset</a>
                 </div>
             </form>
@@ -95,7 +130,24 @@
                     <tr>
                         <td colspan="9" class="text-center text-muted py-5">
                             <i class="bi bi-search d-block mb-2" style="font-size: 2rem;"></i>
-                            No members found matching your current filters.
+
+                            @{
+                                string msg = "No members match.";
+
+                                var lastNameFilter = ViewData["SearchLastName"] as string;
+                                var branchFilter = ViewData["SelectedBranch"] as string;
+
+                                if (!string.IsNullOrWhiteSpace(lastNameFilter))
+                                {
+                                    msg = $"No members match '{lastNameFilter}'.";
+                                }
+                                else if (!string.IsNullOrWhiteSpace(branchFilter))
+                                {
+                                    msg = $"No members match in branch '{branchFilter}'.";
+                                }
+                            }
+
+                            @msg
                         </td>
                     </tr>
                 }

@@ -84,6 +84,32 @@ namespace MembersManagement.Web.Controllers
             return View(membersToShow);
         }
 
+        // ================= DETAILS =================
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            var member = _memberService.GetMember(id);
+            if (member == null) return NotFound();
+
+            var model = new MemberViewModel
+            {
+                MemberID = member.MemberID,
+                FirstName = member.FirstName,
+                LastName = member.LastName,
+                BirthDate = member.BirthDate.ToDateTime(TimeOnly.MinValue),
+                Address = member.Address ?? "",
+                Branch = member.Branch ?? "",
+                ContactNo = member.ContactNo ?? "",
+                Email = member.Email ?? "",
+                IsActive = member.IsActive,
+
+                // --- MATCHING YOUR DOMAIN ENTITY ---
+                CreatedDate = member.DateCreated
+            };
+
+            return View(model);
+        }
+
         // ================= CREATE (GET) =================
         [HttpGet]
         public IActionResult Create()
