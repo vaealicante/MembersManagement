@@ -127,7 +127,7 @@
                         <td class="text-center fw-bold">@m.MemberID</td>
                         <td title="@m.FirstName">@m.FirstName</td>
                         <td title="@m.LastName">@m.LastName</td>
-                        <td>@m.BirthDate.ToString("MM-dd-yyyy")</td>
+                        <td>@(m.BirthDate.HasValue? m.BirthDate.Value.ToString("MM-dd-yyyy") : "")</td>
                         <td title="@m.Address">@m.Address</td>
                         <td title="@m.Branch">@m.Branch</td>
                         <td title="@m.ContactNo">@m.ContactNo</td>

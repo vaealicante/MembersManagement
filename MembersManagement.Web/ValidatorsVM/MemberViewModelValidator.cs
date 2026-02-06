@@ -14,22 +14,19 @@ namespace MembersManagement.Web.ValidatorsVM
             RuleFor(m => m.LastName)
                 .NotEmpty().WithMessage("Last name is required.");
 
+            // MemberViewModelValidator.cs
             RuleFor(m => m.BirthDate)
-                .NotEmpty().WithMessage("Birthdate is required.")
-                .Must(date => date.Date <= DateTime.Today)
+                // Use .HasValue to check if the date was provided
+                .Must(date => !date.HasValue || date.Value.Date <= DateTime.Today)
                 .WithMessage("Birthdate cannot be in the future.");
 
-            RuleFor(m => m.Address)
-                .NotEmpty().WithMessage("Address is required.");
+            RuleFor(m => m.Address);
 
-            RuleFor(m => m.Branch)
-                .NotEmpty().WithMessage("Branch is required.");
+            RuleFor(m => m.Branch);
 
-            RuleFor(m => m.ContactNo)
-                .NotEmpty().WithMessage("Contact number is required.");
+            RuleFor(m => m.ContactNo);
 
             RuleFor(m => m.Email)
-                .NotEmpty().WithMessage("Email is required.")
                 .EmailAddress().WithMessage("Invalid email format.");
         }
     }

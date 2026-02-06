@@ -13,7 +13,7 @@ namespace MembersManagement.Web.Controllers
         private readonly IMemberService _memberService = memberService;
 
         // ================= INDEX (With Dynamic PageSize) =================
-       public IActionResult Index(string? search, string? branch, int page = 1, int pageSize = 5)
+        public IActionResult Index(string? search, string? branch, int page = 1, int pageSize = 5)
         {
             var allMembers = _memberService.GetMembers();
 
@@ -67,7 +67,9 @@ namespace MembersManagement.Web.Controllers
                     MemberID = m.MemberID,
                     FirstName = m.FirstName,
                     LastName = m.LastName,
-                    BirthDate = m.BirthDate.ToDateTime(TimeOnly.MinValue),
+                    BirthDate = m.BirthDate.HasValue
+                              ? m.BirthDate.Value.ToDateTime(TimeOnly.MinValue)
+                              : default(DateTime),
                     Address = m.Address ?? "",
                     Branch = m.Branch ?? "",
                     ContactNo = m.ContactNo ?? "",
@@ -98,7 +100,7 @@ namespace MembersManagement.Web.Controllers
                 MemberID = member.MemberID,
                 FirstName = member.FirstName,
                 LastName = member.LastName,
-                BirthDate = member.BirthDate.ToDateTime(TimeOnly.MinValue),
+                BirthDate = member.BirthDate?.ToDateTime(TimeOnly.MinValue),
                 Address = member.Address ?? "",
                 Branch = member.Branch ?? "",
                 ContactNo = member.ContactNo ?? "",
@@ -119,6 +121,7 @@ namespace MembersManagement.Web.Controllers
         }
 
         // ================= CREATE (POST) =================
+        // MemberController.cs
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(MemberViewModel model)
@@ -135,7 +138,10 @@ namespace MembersManagement.Web.Controllers
                 {
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    BirthDate = DateOnly.FromDateTime(model.BirthDate),
+                    // Use .HasValue check for nullable Date
+                    BirthDate = model.BirthDate.HasValue
+                                ? DateOnly.FromDateTime(model.BirthDate.Value)
+                                : null,
                     Address = model.Address,
                     Branch = model.Branch,
                     ContactNo = model.ContactNo,
@@ -153,9 +159,17 @@ namespace MembersManagement.Web.Controllers
                 {
                     ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
                 }
-                PopulateBranches();
-                return View(model);
             }
+            catch (Exception ex)
+            {
+                // Handle database or unexpected errors
+                ModelState.AddModelError("", "An unexpected error occurred: " + ex.Message);
+            }
+
+            // This return ensures that if any catch block is hit, 
+            // the user is sent back to the form with their data and error messages.
+            PopulateBranches();
+            return View(model);
         }
 
         // ================= EDIT (GET) =================
@@ -170,7 +184,7 @@ namespace MembersManagement.Web.Controllers
                 MemberID = member.MemberID,
                 FirstName = member.FirstName,
                 LastName = member.LastName,
-                BirthDate = member.BirthDate.ToDateTime(TimeOnly.MinValue),
+                BirthDate = member.BirthDate?.ToDateTime(TimeOnly.MinValue),
                 Address = member.Address!,
                 Branch = member.Branch!,
                 ContactNo = member.ContactNo!,
@@ -193,33 +207,25 @@ namespace MembersManagement.Web.Controllers
                 return View(model);
             }
 
-            try
-            {
-                var member = _memberService.GetMember(model.MemberID);
-                if (member == null) return NotFound();
+            var member = _memberService.GetMember(model.MemberID);
+            if (member == null) return NotFound();
 
-                member.FirstName = model.FirstName;
-                member.LastName = model.LastName;
-                member.BirthDate = DateOnly.FromDateTime(model.BirthDate);
-                member.Address = model.Address;
-                member.Branch = model.Branch;
-                member.ContactNo = model.ContactNo;
-                member.Email = model.Email;
-                member.IsActive = model.IsActive;
+            member.FirstName = model.FirstName;
+            member.LastName = model.LastName;
 
-                _memberService.UpdateMember(member);
-                TempData["SuccessMessage"] = "Member updated successfully.";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (FluentValidation.ValidationException ex)
-            {
-                foreach (var error in ex.Errors)
-                {
-                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-                }
-                PopulateBranches();
-                return View(model);
-            }
+            // Correct way to assign nullable DateOnly from nullable DateTime
+            member.BirthDate = model.BirthDate.HasValue
+                               ? DateOnly.FromDateTime(model.BirthDate.Value)
+                               : null;
+
+            member.Address = model.Address;
+            member.Branch = model.Branch;
+            member.ContactNo = model.ContactNo;
+            member.Email = model.Email;
+            member.IsActive = model.IsActive;
+
+            _memberService.UpdateMember(member);
+            return RedirectToAction(nameof(Index));
         }
 
         // ================= DELETE =================

@@ -38,7 +38,9 @@
                                 <div class="icon-box"><i class="bi bi-calendar3"></i></div>
                                 <div>
                                     <p class="info-label text-uppercase fw-bold">Birth Date</p>
-                                    <p class="info-value">@Model.BirthDate.ToString("MMMM dd, yyyy")</p>
+                                    <p class="info-value">
+                                        @(Model.BirthDate.HasValue? Model.BirthDate.Value.ToString("MMMM dd, yyyy") : "Not Provided")
+                                    </p>
                                 </div>
                             </div>
                         </div>

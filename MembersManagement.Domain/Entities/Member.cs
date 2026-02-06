@@ -9,7 +9,7 @@ namespace MembersManagement.Domain.Entities
         // Core Member Data
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
-        public DateOnly BirthDate { get; set; }
+        public DateOnly? BirthDate { get; set; }
         public string? Address { get; set; }
         public string? Branch { get; set; }
 
