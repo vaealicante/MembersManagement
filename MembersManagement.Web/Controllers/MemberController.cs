@@ -69,7 +69,7 @@ namespace MembersManagement.Web.Controllers
                     LastName = m.LastName,
                     BirthDate = m.BirthDate.HasValue
                               ? m.BirthDate.Value.ToDateTime(TimeOnly.MinValue)
-                              : default(DateTime),
+                                 : default,
                     Address = m.Address ?? "",
                     Branch = m.Branch ?? "",
                     ContactNo = m.ContactNo ?? "",
