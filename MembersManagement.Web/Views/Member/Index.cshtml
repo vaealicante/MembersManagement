@@ -17,7 +17,7 @@
 }
 
 <div class="container-fluid">
-    <h2 class="my-4">@ViewData["Title"]</h2>
+    <h2 class="my-4">Members List</h2>
 
     @* NOTIFICATION SYSTEM *@
     @if (TempData["SuccessMessage"] != null)
@@ -80,7 +80,7 @@
                         </div>
                     </div>
 
-                    @* RESET BUTTON (Inside the flex row) *@
+                    @* RESET BUTTON *@
                     <div class="d-flex gap-2">
                         <a asp-action="Index" class="btn btn-outline-secondary px-4 shadow-sm">Reset</a>
                     </div>

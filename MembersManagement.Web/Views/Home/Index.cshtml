@@ -5,9 +5,10 @@
 }
 
 <div class="container py-4">
+    @* HEADER SECTION *@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-0 text-dark">Management Dashboard</h2>
+            <h2 class="fw-bold mb-0 text-dark">Member Dashboard</h2>
         </div>
         <div class="text-end">
             <span class="badge bg-light text-dark border p-2">
@@ -16,6 +17,7 @@
         </div>
     </div>
 
+    @* STAT CARDS *@
     <div class="row g-3 mb-4">
         <div class="col-md-3">
             <div class="card border-0 shadow-sm bg-primary text-white p-3 h-100">
@@ -43,7 +45,7 @@
             <div class="card border-0 shadow-sm bg-warning text-dark p-3 h-100">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <small class="text-uppercase opacity-75 fw-bold">Number of Branches</small>
+                        <small class="text-uppercase opacity-75 fw-bold">Branches</small>
                         <h2 class="fw-bold mb-0">@ViewBag.BranchCount</h2>
                     </div>
                     <i class="bi bi-geo-alt fs-1 opacity-25"></i>
@@ -63,10 +65,13 @@
         </div>
     </div>
 
+    @* MAIN CONTENT ROW *@
     <div class="row g-4">
+
+        @* LEFT COLUMN: TABLE *@
         <div class="col-lg-8">
             <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <div class="card-header bg-white py-3">
                     <h6 class="mb-0 fw-bold text-uppercase text-muted small">Recently Added</h6>
                 </div>
                 <div class="card-body p-0">
@@ -93,11 +98,10 @@
                                             <div class="fw-bold">@m.FirstName @m.LastName</div>
                                             <div class="text-muted" style="font-size: 0.75rem;">ID: #@m.MemberID</div>
                                         </td>
-                                        <td><span class="badge bg-info-subtle text-info ">@m.Branch</span></td>
+                                        <td><span class="badge bg-info-subtle text-info">@m.Branch</span></td>
                                         <td class="text-end pe-3">
-                                            @* Using bi-card-list for a "Details" look *@
                                             <a asp-controller="Member" asp-action="Details" asp-route-id="@m.MemberID"
-                                               class="btn btn-sm btn-outline-info shadow-sm" title="View Member Details">
+                                               class="btn btn-sm btn-outline-info shadow-sm">
                                                 <i class="bi bi-card-list"></i> Details
                                             </a>
                                         </td>
@@ -110,49 +114,36 @@
             </div>
         </div>
 
+        @* RIGHT COLUMN: CHART & QUICK ACTIONS *@
         <div class="col-lg-4">
+            @* Chart Card *@
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-body">
                     <h6 class="fw-bold mb-3 text-uppercase text-muted small text-center">Member Status Ratio</h6>
-                    <canvas id="statusChart" style="max-height: 200px;"></canvas>
+                    <canvas id="statusChart"
+                            style="max-height: 200px;"
+                            data-active="@ViewBag.ActiveMembers"
+                            data-inactive="@ViewBag.InactiveMembers">
+                    </canvas>
                 </div>
             </div>
 
             <div class="card shadow-sm border-0 bg-dark text-white">
                 <div class="card-body">
-                    <h6 class="fw-bold mb-3 small text-uppercase opacity-75">Quick Management</h6>
+                    <h6 class="fw-bold mb-3 small text-uppercase opacity-75">Quick Access</h6>
                     <div class="d-grid gap-2">
                         <a asp-controller="Member" asp-action="Create" class="btn btn-success">
-                            <i class="bi bi-person-plus-fill me-2"></i>Add New Member
+                            <i class="bi bi-person-plus-fill me-2"></i>Create New Member
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+
+    </div> 
+</div> 
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const ctx = document.getElementById('statusChart');
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Active', 'Inactive'],
-                datasets: [{
-                    data: [@ViewBag.ActiveMembers, @ViewBag.InactiveMembers],
-                    backgroundColor: ['#198754', '#adb5bd'],
-                    borderWidth: 0,
-                    hoverOffset: 10
-                }]
-            },
-            options: {
-                cutout: '70%',
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12, padding: 20 } }
-                }
-            }
-        });
-    </script>
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
 }

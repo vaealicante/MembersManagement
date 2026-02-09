@@ -213,10 +213,9 @@ namespace MembersManagement.Web.Controllers
             member.FirstName = model.FirstName;
             member.LastName = model.LastName;
 
-            // Correct way to assign nullable DateOnly from nullable DateTime
             member.BirthDate = model.BirthDate.HasValue
-                               ? DateOnly.FromDateTime(model.BirthDate.Value)
-                               : null;
+                                ? DateOnly.FromDateTime(model.BirthDate.Value)
+                                : null;
 
             member.Address = model.Address;
             member.Branch = model.Branch;
@@ -225,6 +224,10 @@ namespace MembersManagement.Web.Controllers
             member.IsActive = model.IsActive;
 
             _memberService.UpdateMember(member);
+
+        // ========= SUCCESS MESSAGE ==========
+            TempData["SuccessMessage"] = "Member updated successfully.";
+
             return RedirectToAction(nameof(Index));
         }
 
