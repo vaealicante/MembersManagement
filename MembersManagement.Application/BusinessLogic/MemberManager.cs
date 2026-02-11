@@ -35,7 +35,7 @@ namespace MembersManagement.Application.BusinessLogic
         }
 
         //Get member by ID
-        public Member? GetMember(int id)
+        public Member? GetMemberById(int id) // Added "ById" to the name
         {
             return _memberRepository.GetById(id);
         }
