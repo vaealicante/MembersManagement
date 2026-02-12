@@ -1,13 +1,13 @@
 ﻿using FluentValidation;
 using MembersManagement.Domain.Entities;
 using MembersManagement.Domain.Interfaces;
-using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace MembersManagement.Application.BusinessLogic
 {
+    // Using C# 12 Primary Constructor syntax
     public class MemberManager(
         IMemberRepository memberRepository,
         IValidator<Member> validator)
@@ -15,10 +15,14 @@ namespace MembersManagement.Application.BusinessLogic
         private readonly IMemberRepository _memberRepository = memberRepository;
         private readonly IValidator<Member> _validator = validator;
 
-        //Create a new member
+        /// <summary>
+        /// Validates and saves a new member. IsActive defaults to true.
+        /// </summary>
         public void CreateMember(Member member)
         {
+            // Enforces the rules (Optional Birthdate/Email/Contact are handled here)
             _validator.ValidateAndThrow(member);
+
             member.IsActive = true;
             member.DateCreated = DateTime.UtcNow;
 
@@ -26,7 +30,9 @@ namespace MembersManagement.Application.BusinessLogic
             _memberRepository.SaveChanges();
         }
 
-        //Get only active member
+        /// <summary>
+        /// Returns only members where IsActive is true.
+        /// </summary>
         public IEnumerable<Member> GetMembers()
         {
             return _memberRepository
@@ -34,35 +40,43 @@ namespace MembersManagement.Application.BusinessLogic
                 .Where(m => m.IsActive);
         }
 
-        //Get member by ID
-        public Member? GetMember(int id)
+        public Member? GetMemberById(int id)
         {
             return _memberRepository.GetById(id);
         }
 
-        //Update member
+        /// <summary>
+        /// Validates changes and updates the member record.
+        /// </summary>
         public void UpdateMember(Member member)
         {
+            // Re-validates age range and format rules if data was changed
             _validator.ValidateAndThrow(member);
 
             _memberRepository.Update(member);
             _memberRepository.SaveChanges();
         }
 
-        //Soft Delete: Mark IsActive to false
+        /// <summary>
+        /// Performs a Soft Delete by switching the IsActive flag.
+        /// </summary>
         public void DeleteMember(int id)
         {
             var member = _memberRepository.GetById(id)
-                ?? throw new KeyNotFoundException("Member not found.");
+                ?? throw new KeyNotFoundException($"Member with ID {id} was not found.");
 
             member.IsActive = false;
+
             _memberRepository.Update(member);
             _memberRepository.SaveChanges();
         }
 
+        /// <summary>
+        /// Administrative method to see all records regardless of status.
+        /// </summary>
         public IEnumerable<Member> GetAllMembersRaw()
         {
-            return _memberRepository.GetAll(); // Returns everyone (Active and Inactive)
+            return _memberRepository.GetAll();
         }
     }
 }
