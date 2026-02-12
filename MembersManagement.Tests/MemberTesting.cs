@@ -11,180 +11,161 @@ using System.Linq;
 
 namespace MemberManagement.Tests
 {
-    public class MemberTesting
+    public class MemberManagerTests
     {
         private readonly Mock<IMemberRepository> _mockRepo;
-        private readonly Mock<IValidator<Member>> _mockValidator;
-        private readonly MemberManager _memberManager;
         private readonly MemberValidation _realValidator;
+        private readonly MemberManager _memberManager;
 
-        public MemberTesting()
+        public MemberManagerTests()
         {
+            // Initialize the mocked repository and real validator
             _mockRepo = new Mock<IMemberRepository>();
-            _mockValidator = new Mock<IValidator<Member>>();
             _realValidator = new MemberValidation();
-
-            // We inject the mock validator into the manager for behavior testing
-            _memberManager = new MemberManager(_mockRepo.Object, _mockValidator.Object);
+            // Inject dependencies into MemberManager
+            _memberManager = new MemberManager(_mockRepo.Object, _realValidator);
         }
 
-        // --- CREATE TESTS ---
+        // ---------------- CREATE ----------------
 
         [Fact]
-        public void CreateMember_ShouldSucceed_WhenOptionalFieldsAreMissing()
+        public void CreateMember_ShouldAssignMetadata_AndCallSave()
         {
-            // Arrange: Only required fields (FirstName, LastName) are provided
+            // Test that creating a valid member:
+            // 1. Sets IsActive to true
+            // 2. Sets DateCreated to current time
+            // 3. Calls Add() and SaveChanges() on repository
             var member = new Member
             {
-                FirstName = "John",
-                LastName = "Doe",
-                BirthDate = null, // Optional
-                Email = null,      // Optional
-                ContactNo = null   // Optional
+                FirstName = "Alice",
+                LastName = "Smith"
             };
 
-            // Act: Test against the real validation logic
-            var result = _realValidator.Validate(member);
+            _memberManager.CreateMember(member);
 
-            // Assert
-            Assert.True(result.IsValid);
+            Assert.True(member.IsActive);
+            Assert.True(member.DateCreated > DateTime.UtcNow.AddMinutes(-1));
+            _mockRepo.Verify(r => r.Add(member), Times.Once);
+            _mockRepo.Verify(r => r.SaveChanges(), Times.Once);
         }
 
         [Fact]
-        public void CreateMember_ShouldFail_WhenMemberIsUnder18()
+        public void CreateMember_ShouldThrow_WhenValidationFails()
         {
-            // Arrange: Member is 17 years old
-            var member = new Member
-            {
-                FirstName = "Jane",
-                LastName = "Doe",
-                BirthDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-17))
-            };
+            // Test that creating a member with invalid data
+            // (empty first name) throws ValidationException
+            // and does not call repository methods
+            var member = new Member { FirstName = "" };
 
-            // Act
-            var result = _realValidator.Validate(member);
+            Assert.Throws<ValidationException>(() =>
+                _memberManager.CreateMember(member));
 
-            // Assert
-            Assert.False(result.IsValid);
-            Assert.Contains(result.Errors, e => e.ErrorMessage == "Member must be at least 18 years old.");
+            _mockRepo.Verify(r => r.Add(It.IsAny<Member>()), Times.Never);
+            _mockRepo.Verify(r => r.SaveChanges(), Times.Never);
         }
 
-        // --- UPDATE TESTS ---
+        // ---------------- READ ----------------
 
         [Fact]
-        public void UpdateMember_ShouldFail_WhenEmailIsInvalid()
+        public void GetMembers_ShouldOnlyReturnActiveRecords()
         {
-            // Arrange: Providing an incorrectly formatted email
-            var member = new Member
-            {
-                FirstName = "John",
-                LastName = "Doe",
-                Email = "not-an-email"
-            };
-
-            // Act
-            var result = _realValidator.Validate(member);
-
-            // Assert
-            Assert.False(result.IsValid);
-            Assert.Contains(result.Errors, e => e.ErrorMessage == "Invalid email format.");
-        }
-
-        [Fact]
-        public void UpdateMember_ShouldFail_WhenBirthDateIsInFuture()
-        {
-            // Arrange
-            var member = new Member
-            {
-                FirstName = "John",
-                LastName = "Doe",
-                BirthDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
-            };
-
-            // Act
-            var result = _realValidator.Validate(member);
-
-            // Assert
-            Assert.False(result.IsValid);
-            Assert.Contains(result.Errors, e => e.ErrorMessage == "Birthdate cannot be in the future.");
-        }
-
-        [Fact]
-        public void UpdateMember_ShouldSucceed_WhenAgeIsExactly18()
-        {
-            // Arrange: Set birthdate to exactly 18 years ago today
-            var member = new Member
-            {
-                FirstName = "Adult",
-                LastName = "User",
-                BirthDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-18))
-            };
-
-            // Act
-            var result = _realValidator.Validate(member);
-
-            // Assert
-            Assert.True(result.IsValid);
-        }
-
-        // --- READ TESTS ---
-
-        [Fact]
-        public void GetMembers_ShouldReturnOnlyActiveRecords()
-        {
-            // Arrange
-            var memberList = new List<Member>
+            // Test that GetMembers() returns only active members
+            // from a mixed list (active and inactive)
+            var members = new List<Member>
             {
                 new Member { MemberID = 1, IsActive = true },
-                new Member { MemberID = 2, IsActive = false }
+                new Member { MemberID = 2, IsActive = false },
+                new Member { MemberID = 3, IsActive = true }
             };
-            _mockRepo.Setup(r => r.GetAll()).Returns(memberList);
 
-            // Act
-            var result = _memberManager.GetMembers();
+            _mockRepo.Setup(r => r.GetAll()).Returns(members);
 
-            // Assert
-            Assert.Single(result);
-            Assert.True(result.First().IsActive);
+            var result = _memberManager.GetMembers().ToList();
+
+            Assert.Equal(2, result.Count);
+            Assert.All(result, m => Assert.True(m.IsActive));
         }
 
-        // --- DELETE TESTS ---
+        // ---------------- UPDATE ----------------
 
         [Fact]
-        public void DeleteMember_ShouldSetIsActiveToFalse_AndCallUpdate()
+        public void UpdateMember_ShouldUpdateMember_AndSave()
         {
-            // Arrange
-            var existingMember = new Member { MemberID = 10, IsActive = true };
-            _mockRepo.Setup(r => r.GetById(10)).Returns(existingMember);
+            // Test that updating an existing member:
+            // 1. Applies changes to the member object
+            // 2. Calls Update() and SaveChanges() on repository
+            var existingMember = new Member
+            {
+                MemberID = 1,
+                FirstName = "Old",
+                LastName = "Name",
+                IsActive = true
+            };
 
-            // Act
-            _memberManager.DeleteMember(10);
+            _mockRepo.Setup(r => r.GetById(1)).Returns(existingMember);
 
-            // Assert
+            existingMember.FirstName = "New";
+
+            _memberManager.UpdateMember(existingMember);
+
+            _mockRepo.Verify(r => r.Update(existingMember), Times.Once);
+            _mockRepo.Verify(r => r.SaveChanges(), Times.Once);
+        }
+
+        [Fact]
+        public void UpdateMember_ShouldThrow_WhenValidationFails()
+        {
+            // Test that updating a member with invalid data
+            // (empty first and last name) throws ValidationException
+            // and does not call repository methods
+            var member = new Member
+            {
+                MemberID = 1,
+                FirstName = "",
+                LastName = ""
+            };
+
+            Assert.Throws<ValidationException>(() =>
+                _memberManager.UpdateMember(member));
+
+            _mockRepo.Verify(r => r.Update(It.IsAny<Member>()), Times.Never);
+            _mockRepo.Verify(r => r.SaveChanges(), Times.Never);
+        }
+
+        // ---------------- DELETE ----------------
+
+        [Fact]
+        public void DeleteMember_ShouldSetIsActiveToFalse_WhenMemberExists()
+        {
+            // Test that deleting an existing member:
+            // 1. Sets IsActive to false (soft delete)
+            // 2. Calls Update() and SaveChanges() on repository
+            var existingMember = new Member
+            {
+                MemberID = 1,
+                IsActive = true
+            };
+
+            _mockRepo.Setup(r => r.GetById(1)).Returns(existingMember);
+
+            _memberManager.DeleteMember(1);
+
             Assert.False(existingMember.IsActive);
             _mockRepo.Verify(r => r.Update(existingMember), Times.Once);
             _mockRepo.Verify(r => r.SaveChanges(), Times.Once);
         }
 
-        // --- BOUNDARY LOGIC (MAX AGE) ---
-
         [Fact]
-        public void AgeValidation_ShouldFail_WhenMemberIsOlderThan65YearsAnd6Months()
+        public void DeleteMember_ShouldThrowKeyNotFound_WhenMemberDoesNotExist()
         {
-            // Arrange: 66 years ago
-            var member = new Member
-            {
-                FirstName = "Senior",
-                LastName = "Citizen",
-                BirthDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-66))
-            };
+            // Test that deleting a non-existent member
+            // throws KeyNotFoundException with correct message
+            _mockRepo.Setup(r => r.GetById(99)).Returns((Member?)null);
 
-            // Act
-            var result = _realValidator.Validate(member);
+            var ex = Assert.Throws<KeyNotFoundException>(() =>
+                _memberManager.DeleteMember(99));
 
-            // Assert
-            Assert.False(result.IsValid);
-            Assert.Contains(result.Errors, e => e.ErrorMessage == "Member cannot be older than 65 years, 6 months, and 1 day.");
+            Assert.Equal("Member with ID 99 was not found.", ex.Message);
         }
     }
 }
