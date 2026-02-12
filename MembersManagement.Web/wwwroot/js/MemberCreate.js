@@ -22,6 +22,7 @@
                 this.classList.add('is-valid');
                 this.classList.remove('is-invalid');
             } else {
+                // If the field is empty, clear validation (it's optional)
                 this.classList.remove('is-invalid', 'is-valid');
             }
         });
@@ -32,40 +33,60 @@
 
     if (birthDateInput) {
         birthDateInput.addEventListener('change', function () {
+            const errorSpan = document.querySelector('[data-valmsg-for="BirthDate"]');
+            const submitBtn = document.getElementById('btnSaveMember');
+
+            // --- LOCAL HELPER FUNCTIONS ---
+            function showError(msg) {
+                if (errorSpan) errorSpan.textContent = msg;
+                birthDateInput.classList.add('is-invalid');
+                if (submitBtn) submitBtn.disabled = true;
+            }
+
+            function clearError() {
+                if (errorSpan) errorSpan.textContent = "";
+                birthDateInput.classList.remove('is-invalid');
+                if (submitBtn) submitBtn.disabled = false;
+            }
+
+            // --- OPTIONAL CHECK ---
+            // If the user clears the date field, remove errors and allow saving
+            if (!this.value) {
+                clearError();
+                return;
+            }
+
             const birthDate = new Date(this.value);
             const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
             if (isNaN(birthDate)) return;
 
-            // Precise Max Age Calculation (65y, 6m, 1d)
-            // Subtracting from today's date to find the earliest possible valid birthdate
+            // 1. Future Date Validation
+            if (birthDate > today) {
+                showError("Birthdate cannot be in the future.");
+                return;
+            }
+
+            // 2. Minimum Age Calculation (18y)
+            const minDate = new Date();
+            minDate.setFullYear(today.getFullYear() - 18);
+            minDate.setHours(0, 0, 0, 0);
+
+            // 3. Precise Max Age Calculation (65y, 6m, 1d)
             const maxDate = new Date();
             maxDate.setFullYear(today.getFullYear() - 65);
             maxDate.setMonth(today.getMonth() - 6);
             maxDate.setDate(today.getDate() - 1);
+            maxDate.setHours(0, 0, 0, 0);
 
-            // Minimum Age Calculation (18y)
-            const minDate = new Date();
-            minDate.setFullYear(today.getFullYear() - 18);
-
-            const errorSpan = document.querySelector('[data-valmsg-for="BirthDate"]');
-
+            // Validation logic tree
             if (birthDate > minDate) {
                 showError("Member must be at least 18 years old.");
             } else if (birthDate < maxDate) {
                 showError("Member cannot be older than 65 years, 6 months, and 1 day.");
             } else {
                 clearError();
-            }
-
-            function showError(msg) {
-                if (errorSpan) errorSpan.textContent = msg;
-                birthDateInput.classList.add('is-invalid');
-            }
-
-            function clearError() {
-                if (errorSpan) errorSpan.textContent = "";
-                birthDateInput.classList.remove('is-invalid');
             }
         });
     }

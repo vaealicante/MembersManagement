@@ -4,56 +4,79 @@ using System;
 
 namespace MembersManagement.Application.Validators
 {
+    /// Defines validation rules for the Member entity.
+    /// Ensures required fields are present and optional fields
+    /// follow business constraints when provided.
     public class MemberValidation : AbstractValidator<Member>
     {
         public MemberValidation()
         {
+            // -------------------------------------------------
+            // REQUIRED FIELDS
+            // -------------------------------------------------
+
+            // Ensures the member has a first name.
             RuleFor(m => m.FirstName)
-                .NotEmpty().WithMessage("First name is required.");
+                .NotEmpty()
+                .WithMessage("First name is required.");
 
+            // Ensures the member has a last name.
             RuleFor(m => m.LastName)
-                .NotEmpty().WithMessage("Last name is required.");
+                .NotEmpty()
+                .WithMessage("Last name is required.");
 
+            // -------------------------------------------------
+            // OPTIONAL BIRTHDATE
+            // -------------------------------------------------
+            // Applied only when BirthDate has a value.
+            // Validates:
+            // 1. Birthdate is not in the future
+            // 2. Member is at least 18 years old
+            // 3. Member does not exceed the maximum allowed age
             RuleFor(m => m.BirthDate)
-            .NotEmpty().WithMessage("Birth date is required.")
-            .Must(BeWithinAllowedAgeRange)
-            .WithMessage("Age must be between 18 and 65 years, 6 months, and 1 day.");
+                .Cascade(CascadeMode.Stop) // Stop further checks if one rule fails
+                .Must(NotBeInFuture)
+                .WithMessage("Birthdate cannot be in the future.")
+                .Must(BeAtLeast18)
+                .WithMessage("Member must be at least 18 years old.")
+                .Must(NotExceedMaxAge)
+                .WithMessage("Member cannot be older than 65 years, 6 months, and 1 day.")
+                .When(m => m.BirthDate.HasValue);
 
-            RuleFor(m => m.Address);
-
-
-            RuleFor(m => m.Branch);
-
-
+            // -------------------------------------------------
+            // OPTIONAL CONTACT NUMBER
+            // -------------------------------------------------
+            // Validates Philippine mobile number format:
+            // Starts with 09 or +639 and contains 11 digits total.
             RuleFor(m => m.ContactNo)
+                .Matches(@"^(09|\+639|639)\d{9}$")
+                .WithMessage("Contact number must be valid.")
+                .When(m => !string.IsNullOrWhiteSpace(m.ContactNo));
 
-                .Matches(@"^(09|\+639)\d{9}$")
-                .WithMessage("Contact number must be valid.");
-
+            // -------------------------------------------------
+            // OPTIONAL EMAIL
+            // -------------------------------------------------
+            // Ensures the email is in a valid format if provided.
             RuleFor(m => m.Email)
-
-                .EmailAddress().WithMessage("Invalid email format.");
+                .EmailAddress()
+                .WithMessage("Invalid email format.")
+                .When(m => !string.IsNullOrWhiteSpace(m.Email));
         }
 
-        private bool BeWithinAllowedAgeRange(DateOnly? birthDate)
-        {
-            // Use .HasValue (Capital H) or != null
-            if (birthDate == null) return false;
+        /// Ensures the birthdate is not set to a future date.
+        private bool NotBeInFuture(DateOnly? date) =>
+            date!.Value <= DateOnly.FromDateTime(DateTime.Today);
 
-            var today = DateOnly.FromDateTime(DateTime.Today);
-            var dob = birthDate.Value;
+        /// Ensures the member is at least 18 years old.
+        private bool BeAtLeast18(DateOnly? date) =>
+            date!.Value <= DateOnly.FromDateTime(DateTime.Today).AddYears(-18);
 
-            // Minimum Age: 18 years ago from today
-            var minDate = today.AddYears(-18);
-
-            // Maximum Age: 65 years, 6 months, and 1 day ago from today
-            var maxDate = today.AddYears(-65).AddMonths(-6).AddDays(-1);
-
-            // Validation: 
-            // Must be born on or BEFORE minDate (at least 18)
-            // Must be born on or AFTER maxDate (not older than 65y 6m 1d)
-            return dob <= minDate && dob >= maxDate;
-        }
+        /// Ensures the member does not exceed the maximum age
+        /// of 65 years, 6 months, and 1 day.
+        private bool NotExceedMaxAge(DateOnly? date) =>
+            date!.Value >= DateOnly.FromDateTime(DateTime.Today)
+                .AddYears(-65)
+                .AddMonths(-6)
+                .AddDays(-1);
     }
 }
-

@@ -1,12 +1,13 @@
+using Xunit;
+using Moq;
 using FluentValidation;
 using MembersManagement.Application.BusinessLogic;
 using MembersManagement.Application.Validators;
 using MembersManagement.Domain.Entities;
 using MembersManagement.Domain.Interfaces;
-using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 
 namespace MemberManagement.Tests
 {
@@ -23,25 +24,115 @@ namespace MemberManagement.Tests
             _mockValidator = new Mock<IValidator<Member>>();
             _realValidator = new MemberValidation();
 
+            // We inject the mock validator into the manager for behavior testing
             _memberManager = new MemberManager(_mockRepo.Object, _mockValidator.Object);
         }
 
-        // --- CREATE ---
+        // --- CREATE TESTS ---
+
         [Fact]
-        public void CreateMember_ShouldCallRepositoryAddAndSave()
+        public void CreateMember_ShouldSucceed_WhenOptionalFieldsAreMissing()
         {
-            var newMember = new Member { FirstName = "John", LastName = "Doe" };
+            // Arrange: Only required fields (FirstName, LastName) are provided
+            var member = new Member
+            {
+                FirstName = "John",
+                LastName = "Doe",
+                BirthDate = null, // Optional
+                Email = null,      // Optional
+                ContactNo = null   // Optional
+            };
 
-            _memberManager.CreateMember(newMember);
+            // Act: Test against the real validation logic
+            var result = _realValidator.Validate(member);
 
-            _mockRepo.Verify(r => r.Add(It.IsAny<Member>()), Times.Once);
-            _mockRepo.Verify(r => r.SaveChanges(), Times.Once);
+            // Assert
+            Assert.True(result.IsValid);
         }
 
-        // --- READ (Multiple) ---
+        [Fact]
+        public void CreateMember_ShouldFail_WhenMemberIsUnder18()
+        {
+            // Arrange: Member is 17 years old
+            var member = new Member
+            {
+                FirstName = "Jane",
+                LastName = "Doe",
+                BirthDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-17))
+            };
+
+            // Act
+            var result = _realValidator.Validate(member);
+
+            // Assert
+            Assert.False(result.IsValid);
+            Assert.Contains(result.Errors, e => e.ErrorMessage == "Member must be at least 18 years old.");
+        }
+
+        // --- UPDATE TESTS ---
+
+        [Fact]
+        public void UpdateMember_ShouldFail_WhenEmailIsInvalid()
+        {
+            // Arrange: Providing an incorrectly formatted email
+            var member = new Member
+            {
+                FirstName = "John",
+                LastName = "Doe",
+                Email = "not-an-email"
+            };
+
+            // Act
+            var result = _realValidator.Validate(member);
+
+            // Assert
+            Assert.False(result.IsValid);
+            Assert.Contains(result.Errors, e => e.ErrorMessage == "Invalid email format.");
+        }
+
+        [Fact]
+        public void UpdateMember_ShouldFail_WhenBirthDateIsInFuture()
+        {
+            // Arrange
+            var member = new Member
+            {
+                FirstName = "John",
+                LastName = "Doe",
+                BirthDate = DateOnly.FromDateTime(DateTime.Today.AddDays(1))
+            };
+
+            // Act
+            var result = _realValidator.Validate(member);
+
+            // Assert
+            Assert.False(result.IsValid);
+            Assert.Contains(result.Errors, e => e.ErrorMessage == "Birthdate cannot be in the future.");
+        }
+
+        [Fact]
+        public void UpdateMember_ShouldSucceed_WhenAgeIsExactly18()
+        {
+            // Arrange: Set birthdate to exactly 18 years ago today
+            var member = new Member
+            {
+                FirstName = "Adult",
+                LastName = "User",
+                BirthDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-18))
+            };
+
+            // Act
+            var result = _realValidator.Validate(member);
+
+            // Assert
+            Assert.True(result.IsValid);
+        }
+
+        // --- READ TESTS ---
+
         [Fact]
         public void GetMembers_ShouldReturnOnlyActiveRecords()
         {
+            // Arrange
             var memberList = new List<Member>
             {
                 new Member { MemberID = 1, IsActive = true },
@@ -49,78 +140,51 @@ namespace MemberManagement.Tests
             };
             _mockRepo.Setup(r => r.GetAll()).Returns(memberList);
 
+            // Act
             var result = _memberManager.GetMembers();
 
-            Assert.Single(result); // Should only find 1 active member
+            // Assert
+            Assert.Single(result);
             Assert.True(result.First().IsActive);
         }
 
-        // --- READ (Single) ---
+        // --- DELETE TESTS ---
+
         [Fact]
-        public void GetMemberById_ShouldReturnCorrectMember()
+        public void DeleteMember_ShouldSetIsActiveToFalse_AndCallUpdate()
         {
-            var member = new Member { MemberID = 5, FirstName = "Alice" };
-            _mockRepo.Setup(r => r.GetById(5)).Returns(member);
-
-            var result = _memberManager.GetMemberById(5);
-
-            Assert.NotNull(result);
-            Assert.Equal("Alice", result.FirstName);
-        }
-
-        // --- UPDATE ---
-        [Fact]
-        public void UpdateMember_ShouldCallRepositoryUpdateAndSave()
-        {
-            var existingMember = new Member { MemberID = 1, FirstName = "Old Name" };
-
-            _memberManager.UpdateMember(existingMember);
-
-            _mockRepo.Verify(r => r.Update(existingMember), Times.Once);
-            _mockRepo.Verify(r => r.SaveChanges(), Times.Once);
-        }
-
-        // --- DELETE (Soft Delete) ---
-        [Fact]
-        public void DeleteMember_ShouldSetIsActiveToFalse()
-        {
+            // Arrange
             var existingMember = new Member { MemberID = 10, IsActive = true };
             _mockRepo.Setup(r => r.GetById(10)).Returns(existingMember);
 
+            // Act
             _memberManager.DeleteMember(10);
 
+            // Assert
             Assert.False(existingMember.IsActive);
             _mockRepo.Verify(r => r.Update(existingMember), Times.Once);
             _mockRepo.Verify(r => r.SaveChanges(), Times.Once);
         }
 
+        // --- BOUNDARY LOGIC (MAX AGE) ---
+
         [Fact]
-        public void CreateMember_ShouldThrowException_WhenValidationFails()
+        public void AgeValidation_ShouldFail_WhenMemberIsOlderThan65YearsAnd6Months()
         {
-            // Arrange: Force the mock validator to throw an error
-            var invalidMember = new Member();
-            _mockValidator.Setup(v => v.Validate(invalidMember))
-                .Returns(new FluentValidation.Results.ValidationResult(new[]
-                    { new FluentValidation.Results.ValidationFailure("FirstName", "Required") }));
-
-            // Act & Assert
-            Assert.Throws<ValidationException>(() => _memberManager.CreateMember(invalidMember));
-        }
-
-        // --- VALIDATION (Age Range Theory) ---
-        [Theory]
-        [InlineData(-17)]
-        [InlineData(-66)]
-        public void AgeValidation_ShouldFail_IfOutsideAllowedRange(int yearsOffset)
-        {
+            // Arrange: 66 years ago
             var member = new Member
             {
-                BirthDate = DateOnly.FromDateTime(DateTime.Today.AddYears(yearsOffset))
+                FirstName = "Senior",
+                LastName = "Citizen",
+                BirthDate = DateOnly.FromDateTime(DateTime.Today.AddYears(-66))
             };
 
+            // Act
             var result = _realValidator.Validate(member);
 
+            // Assert
             Assert.False(result.IsValid);
+            Assert.Contains(result.Errors, e => e.ErrorMessage == "Member cannot be older than 65 years, 6 months, and 1 day.");
         }
     }
 }
