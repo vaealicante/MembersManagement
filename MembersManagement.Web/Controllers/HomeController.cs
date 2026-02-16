@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using MembersManagement.Web.Models;
 using System.Diagnostics;
 using System.Linq;
-using MembersManagement.Application.ApplicationInterface; // Ensure this is your actual namespace
-using MembersManagement.Domain.Entities;
+using MembersManagement.Domain.DomMemberModule.Entities;
+using MembersManagement.Application.AppMemberModule.ApplicationInterface;
 
 namespace MembersManagement.Web.Controllers
 {

@@ -1,7 +1,7 @@
-﻿using MembersManagement.Domain.Entities;
+﻿using MembersManagement.Domain.DomMemberModule.Entities;
 using System.Collections.Generic;
 
-namespace MembersManagement.Domain.Interfaces
+namespace MembersManagement.Domain.DomMemberModule.Interfaces
 {
     public interface IMemberRepository
     {

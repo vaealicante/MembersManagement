@@ -1,9 +1,9 @@
-﻿using MembersManagement.Application.BusinessLogic;
-using MembersManagement.Domain.Entities;
-using MembersManagement.Application.ApplicationInterface;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using MembersManagement.Application.AppMemberModule.ApplicationInterface;
+using MembersManagement.Application.AppMemberModule.BusinessLogic;
+using MembersManagement.Domain.DomMemberModule.Entities;
 
-namespace MembersManagement.Application.Services
+namespace MembersManagement.Application.AppMemberModule.Services
 {
     public class MemberService(MemberManager manager) : IMemberService
     {

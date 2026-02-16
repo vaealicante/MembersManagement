@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
-using MembersManagement.Domain.Entities;
-using MembersManagement.Domain.Interfaces;
+using MembersManagement.Domain.DomMemberModule.Entities;
+using MembersManagement.Domain.DomMemberModule.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MembersManagement.Application.BusinessLogic
+namespace MembersManagement.Application.AppMemberModule.BusinessLogic
 {
     // Using C# 12 Primary Constructor syntax
     public class MemberManager(

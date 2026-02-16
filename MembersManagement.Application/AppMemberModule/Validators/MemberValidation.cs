@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
-using MembersManagement.Domain.Entities;
+using MembersManagement.Domain.DomMemberModule.Entities;
 using System;
 
-namespace MembersManagement.Application.Validators
+namespace MembersManagement.Application.AppMemberModule.Validators
 {
     /// Defines validation rules for the Member entity.
     /// Ensures required fields are present and optional fields
