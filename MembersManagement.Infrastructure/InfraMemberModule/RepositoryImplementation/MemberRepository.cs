@@ -1,11 +1,11 @@
-﻿using MembersManagement.Domain.Entities;
-using MembersManagement.Domain.Interfaces;
-using MembersManagement.Infrastructure.AppDbContext;
+﻿using MembersManagement.Domain.DomMemberModule.Entities;
+using MembersManagement.Domain.DomMemberModule.Interfaces;
+using MembersManagement.Infrastructure.InfraMemberModule.AppDbContext;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MembersManagement.Infrastructure.RepositoryImplementation
+namespace MembersManagement.Infrastructure.InfraMemberModule.RepositoryImplementation
 {
     public class MemberRepository : IMemberRepository
     {

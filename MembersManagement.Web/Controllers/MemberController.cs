@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MembersManagement.Application.ApplicationInterface;
-using MembersManagement.Domain.Entities;
+using MembersManagement.Domain.DomMemberModule.Entities;
 using MembersManagement.Web.ViewModels;
 using System;
 using System.Linq;
 using System.Globalization;
+using MembersManagement.Application.AppMemberModule.ApplicationInterface;
 
 namespace MembersManagement.Web.Controllers
 {
