@@ -1,13 +1,13 @@
 using Xunit;
 using Moq;
 using FluentValidation;
-using MembersManagement.Application.BusinessLogic;
-using MembersManagement.Application.Validators;
-using MembersManagement.Domain.Entities;
-using MembersManagement.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MembersManagement.Application.MemberModule.BusinessLogic;
+using MembersManagement.Application.MemberModule.Validators;
+using MembersManagement.Domain.MemberModule.Entities;
+using MembersManagement.Domain.MemberModule.Interfaces;
 
 namespace MemberManagement.Tests
 {

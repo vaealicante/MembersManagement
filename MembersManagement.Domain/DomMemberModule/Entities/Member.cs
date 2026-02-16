@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MembersManagement.Domain.Entities
+namespace MembersManagement.Domain.DomMemberModule.Entities
 {
     public class Member
     {

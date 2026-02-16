@@ -1,13 +1,13 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using MembersManagement.Application.ApplicationInterface;
-using MembersManagement.Application.BusinessLogic;
-using MembersManagement.Application.Services;
-using MembersManagement.Application.Validators;
-using MembersManagement.Domain.Entities;
-using MembersManagement.Domain.Interfaces;
-using MembersManagement.Infrastructure.AppDbContext;
-using MembersManagement.Infrastructure.RepositoryImplementation;
+using MembersManagement.Application.AppMemberModule.ApplicationInterface;
+using MembersManagement.Application.AppMemberModule.BusinessLogic;
+using MembersManagement.Application.AppMemberModule.Services;
+using MembersManagement.Application.AppMemberModule.Validators;
+using MembersManagement.Domain.DomMemberModule.Entities;
+using MembersManagement.Domain.DomMemberModule.Interfaces;
+using MembersManagement.Infrastructure.InfraMemberModule.AppDbContext;
+using MembersManagement.Infrastructure.InfraMemberModule.RepositoryImplementation;
 using MembersManagement.Web.ValidatorsVM;
 using Microsoft.EntityFrameworkCore;
 

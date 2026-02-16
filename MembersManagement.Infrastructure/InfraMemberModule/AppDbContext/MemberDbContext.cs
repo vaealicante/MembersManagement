@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MembersManagement.Domain.Entities;
+using MembersManagement.Domain.DomMemberModule.Entities;
 
-namespace MembersManagement.Infrastructure.AppDbContext
+namespace MembersManagement.Infrastructure.InfraMemberModule.AppDbContext
 
 {
     public class MemberDbContext : DbContext

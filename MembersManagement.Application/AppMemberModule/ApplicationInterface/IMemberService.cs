@@ -1,7 +1,7 @@
-﻿using MembersManagement.Domain.Entities;
+﻿using MembersManagement.Domain.DomMemberModule.Entities;
 using System.Collections.Generic;
 
-namespace MembersManagement.Application.ApplicationInterface
+namespace MembersManagement.Application.AppMemberModule.ApplicationInterface
 {
     public interface IMemberService
     {
