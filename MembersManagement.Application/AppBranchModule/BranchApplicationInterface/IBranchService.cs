@@ -5,7 +5,7 @@ namespace MembersManagement.Application.AppBranchModule.BranchApplicationInterfa
 {
     public interface IBranchService
     {
-        IEnumerable<Branch> GetBranch();
+        IEnumerable<Branch> GetAllBranches();
         Branch? GetBranch(int id);
         void CreateBranch(Branch branch);
         void UpdateBranch(Branch branch);

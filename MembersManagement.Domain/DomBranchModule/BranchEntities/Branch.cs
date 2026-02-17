@@ -4,7 +4,7 @@ namespace MembersManagement.Domain.DomBranchModule.BranchEntities
 {
     public class Branch
     {
-        public int BranchID { get; set; }
+        public int BranchId { get; set; }
 
         // Branch Data
         public string BranchName { get; set; } = null!;

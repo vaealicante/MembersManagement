@@ -1,23 +1,21 @@
 ﻿using MembersManagement.Domain.DomBranchModule.BranchEntities;
-using MembersManagement.Domain.DomBranchModule.Interfaces;
-using MembersManagement.Infrastructure.InfraBranchModule.BranchAppDbContext;
+using MembersManagement.Domain.DomBranchModule.BranchInterfaces;
+using MembersManagement.Infrastructure.AppDbContext;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace MembersManagement.Infrastructure.InfraBranchModule.BranchRepositoryImplementation
 {
     public class BranchRepository : IBranchRepository
     {
-        private readonly BranchDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public BranchRepository(BranchDbContext context)
+        public BranchRepository(ApplicationDbContext context)
         {
             _context = context;
         }
 
         public IEnumerable<Branch> GetAll()
-    => _context.Branches.AsNoTracking().ToList();
+            => _context.Branches.AsNoTracking().ToList();
 
         public Branch? GetById(int id)
             => _context.Branches.Find(id);

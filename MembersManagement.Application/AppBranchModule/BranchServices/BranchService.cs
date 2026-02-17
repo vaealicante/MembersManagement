@@ -1,24 +1,33 @@
-﻿using System.Collections.Generic;
-using MembersManagement.Application.AppBranchModule.BranchApplicationInterface;
-using MembersManagement.Application.AppBranchModule.BranchBusinessLogic;
+﻿using MembersManagement.Application.AppBranchModule.BranchApplicationInterface;
 using MembersManagement.Domain.DomBranchModule.BranchEntities;
-
+using MembersManagement.Domain.DomBranchModule.BranchInterfaces; // Ensure this matches your repo namespace
 
 namespace MembersManagement.Application.AppBranchModule.BranchServices
 {
-    public class BranchService(BranchManager manager) : IBranchService
+    public class BranchService : IBranchService
     {
-        private readonly BranchManager _manager = manager;
+        // 1. Declare the private field
+        private readonly IBranchRepository _branchRepository;
 
-        public IEnumerable<Branch> GetBranch() => _manager.GetBranch();
+        // 2. Inject the repository through the constructor
+        public BranchService(IBranchRepository branchRepository)
+        {
+            _branchRepository = branchRepository;
+        }
 
-        public Branch? GetBranch(int id) => _manager.GetBranchById(id);
+        // 3. Implement the method using the repository
+        public IEnumerable<Branch> GetAllBranches()
+        {
+            // This now works because _branchRepository is defined above!
+            return _branchRepository.GetAll(); 
+        }
 
-        public void CreateBranch(Branch branch) => _manager.CreateBranch(branch);
+        public Branch? GetBranch(int id) => _branchRepository.GetById(id);
 
-        public void UpdateBranch(Branch branch) => _manager.UpdateBranch(branch);
+        public void CreateBranch(Branch branch) => _branchRepository.Add(branch);
 
-        public void DeleteBranch(int id) => _manager.DeleteBranch(id);
+        public void UpdateBranch(Branch branch) => _branchRepository.Update(branch);
+
+        public void DeleteBranch(int id) => _branchRepository.Delete(id);
     }
-
 }
