@@ -1,23 +1,21 @@
 ﻿using MembersManagement.Domain.DomMemberModule.Entities;
 using MembersManagement.Domain.DomMemberModule.Interfaces;
-using MembersManagement.Infrastructure.InfraMemberModule.AppDbContext;
+using MembersManagement.Infrastructure.AppDbContext;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace MembersManagement.Infrastructure.InfraMemberModule.RepositoryImplementation
 {
     public class MemberRepository : IMemberRepository
     {
-        private readonly MemberDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public MemberRepository(MemberDbContext context)
+        public MemberRepository(ApplicationDbContext context)
         {
             _context = context;
         }
 
         public IEnumerable<Member> GetAll()
-    => _context.Members.AsNoTracking().ToList();
+            => _context.Members.AsNoTracking().ToList();
 
         public Member? GetById(int id)
             => _context.Members.Find(id);

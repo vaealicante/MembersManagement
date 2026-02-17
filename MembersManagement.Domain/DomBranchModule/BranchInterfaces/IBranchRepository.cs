@@ -1,7 +1,7 @@
 ﻿using MembersManagement.Domain.DomBranchModule.BranchEntities;
 using System.Collections.Generic;
 
-namespace MembersManagement.Domain.DomBranchModule.Interfaces
+namespace MembersManagement.Domain.DomBranchModule.BranchInterfaces
 {
     public interface IBranchRepository
     {

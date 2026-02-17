@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using MembersManagement.Domain.DomBranchModule.BranchEntities;
-using MembersManagement.Domain.DomBranchModule.Interfaces;
+using MembersManagement.Domain.DomBranchModule.BranchInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

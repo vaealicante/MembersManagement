@@ -22,16 +22,14 @@ namespace MembersManagement.Web.Controllers
         {
             var allMembers = _memberService.GetDashboardData().ToList();
 
-            // Use explicit boolean checks
             ViewBag.TotalMembers = allMembers.Count;
             ViewBag.ActiveMembers = allMembers.Count(m => m.IsActive == true);
-            ViewBag.InactiveMembers = allMembers.Count(m => m.IsActive == false); // Try explicit == false
+            ViewBag.InactiveMembers = allMembers.Count(m => m.IsActive == false);
 
-            // Count branches
-            // The '?' ensures Trim() only runs if Branch is not null
+            // FIX: Count unique branches using BranchId instead of the Branch string
             ViewBag.BranchCount = allMembers
-                .Where(m => !string.IsNullOrWhiteSpace(m.Branch))
-                .Select(m => m.Branch?.Trim().ToUpper())
+                .Where(m => m.BranchId.HasValue)
+                .Select(m => m.BranchId)
                 .Distinct()
                 .Count();
 

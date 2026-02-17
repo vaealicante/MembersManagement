@@ -4,10 +4,10 @@ using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MembersManagement.Application.MemberModule.BusinessLogic;
-using MembersManagement.Application.MemberModule.Validators;
-using MembersManagement.Domain.MemberModule.Entities;
-using MembersManagement.Domain.MemberModule.Interfaces;
+using MembersManagement.Application.AppMemberModule.BusinessLogic;
+using MembersManagement.Application.AppMemberModule.Validators;
+using MembersManagement.Domain.DomMemberModule.Entities;
+using MembersManagement.Domain.DomMemberModule.Interfaces;
 
 namespace MemberManagement.Tests
 {
