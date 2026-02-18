@@ -32,14 +32,26 @@
         </div>
     }
 
+    @* ACTION BUTTONS *@
+    <div class="mb-3 d-flex gap-2">
+        <!-- Create New Member -->
+        <a asp-controller="Member" asp-action="Create" class="btn btn-success btn-sm shadow-sm">
+            <i class="bi bi-person-plus-fill"></i> Create New Member
+        </a>
+
+        <!-- View Branch List -->
+        <a asp-controller="Branch" asp-action="Index" class="btn btn-primary btn-sm shadow-sm">
+            <i class="bi bi-building-gear"></i> Branches
+        </a>
+    </div>
+
     @* FILTER & SEARCH FORM *@
     <div class="card shadow-sm mb-4 filter-container">
         <div class="card-body">
             <form id="filterForm" method="get">
                 <input type="hidden" name="page" id="currentPageInput" value="1" />
-
                 <div class="d-flex flex-wrap gap-3 align-items-end">
-                    @* SEARCH INPUT *@
+                    <!-- SEARCH INPUT -->
                     <div style="flex: 2; min-width: 250px;">
                         <label class="small text-muted fw-bold text-uppercase d-block mb-1">SEARCH</label>
                         <div class="input-group">
@@ -51,48 +63,37 @@
                         </div>
                     </div>
 
-                    
-                    @* SEARCHABLE BRANCH *@
+                    <!-- SEARCHABLE BRANCH -->
                     <div style="flex: 1; min-width: 200px;">
                         <label class="small text-muted fw-bold text-uppercase d-block mb-1">Branch</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0">
                                 <i class="bi bi-geo-alt text-muted"></i>
                             </span>
-
-                            @* The user can type here OR click the arrow on the right to see the dropdown *@
                             <input name="branch"
                                    list="branchOptions"
                                    class="form-control border-start-0"
                                    placeholder="Filter Branch..."
                                    value="@currentBranch" />
-
                             <datalist id="branchOptions">
                                 @foreach (var b in branches)
                                 {
                                     <option value="@b">@b</option>
                                 }
                             </datalist>
-
                             <button class="btn btn-outline-secondary" type="submit">
                                 <i class="bi bi-funnel"></i>
                             </button>
                         </div>
                     </div>
 
-                    @* RESET BUTTON *@
+                    <!-- RESET BUTTON -->
                     <div class="d-flex gap-2">
                         <a asp-action="Index" class="btn btn-outline-secondary px-4 shadow-sm">Reset</a>
                     </div>
                 </div>
-            </form> @* Correctly closed form *@
+            </form>
         </div>
-    </div>
-
-    <div class="mb-3">
-        <a asp-action="Create" class="btn btn-success btn-sm shadow-sm">
-            <i class="bi bi-plus-lg"></i> Create New Member
-        </a>
     </div>
 
     @* MEMBER DATA TABLE *@
@@ -205,6 +206,7 @@
         </div>
     </div>
 </div>
+
 @* DELETE MODAL *@
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">

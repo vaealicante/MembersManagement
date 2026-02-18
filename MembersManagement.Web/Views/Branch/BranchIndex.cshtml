@@ -1,0 +1,117 @@
+﻿@model IEnumerable<MembersManagement.Web.ViewModels.BranchViewModel>
+
+@{
+    ViewData["Title"] = "Branch Details";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-building-list me-2"></i>Branch Details</h2>
+        <div>
+            <!-- Back to Members -->
+            <a asp-controller="Member" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to Members
+            </a>
+
+            <!-- Add New Branch -->
+            <a asp-controller="Branch" asp-action="CreateBranch" class="btn btn-primary btn-sm ms-2">
+                <i class="bi bi-plus-circle"></i> Add New Branch
+            </a>
+        </div>
+    </div>
+
+    @* Success Message with auto-hide *@
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" id="successAlert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <script>
+            // Auto-hide alert after 5 seconds
+            setTimeout(function () {
+                var alertElement = document.getElementById('successAlert');
+                if (alertElement) {
+                    var bsAlert = bootstrap.Alert.getOrCreateInstance(alertElement);
+                    bsAlert.close();
+                }
+            }, 5000);
+        </script>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="ps-4">Branch ID</th>
+                            <th>Branch Name</th>
+                            <th>Location/Address</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">No branches found.</td>
+                            </tr>
+                        }
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold">@item.BranchId</td>
+                                <td>@item.BranchName</td>
+                                <td>@item.Location</td>
+                                <td class="text-center">
+                                    <!-- Edit Button -->
+                                    <a asp-controller="Branch"
+                                       asp-action="Edit"
+                                       asp-route-id="@item.BranchId"
+                                       class="btn btn-sm btn-outline-warning">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+
+                                    <!-- Soft Delete Button -->
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger ms-1"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal-@item.BranchId">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+
+                                    <!-- Delete Confirmation Modal -->
+                                    <div class="modal fade" id="deleteModal-@item.BranchId" tabindex="-1" aria-labelledby="deleteModalLabel-@item.BranchId" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="deleteModalLabel-@item.BranchId">Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete the branch "<strong>@item.BranchName</strong>"?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                                                    <form asp-controller="Branch" asp-action="SoftDelete" method="post" class="d-inline">
+                                                        <input type="hidden" name="id" value="@item.BranchId" />
+                                                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- End Modal -->
+
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

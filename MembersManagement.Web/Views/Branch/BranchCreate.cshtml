@@ -1,0 +1,65 @@
+﻿@model MembersManagement.Web.ViewModels.BranchViewModel
+
+@{
+    ViewData["Title"] = "Create Branch";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Create New Branch</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-controller="Branch" asp-action="CreateBranch" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        <!-- Branch Name -->
+                        <div class="mb-4">
+                            <label asp-for="BranchName" class="form-label small fw-bold text-muted text-uppercase">Branch Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-building text-muted"></i>
+                                </span>
+                                <input asp-for="BranchName" class="form-control border-start-0" placeholder=" " />
+                            </div>
+                            <span asp-validation-for="BranchName" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="mb-4">
+                            <label asp-for="Location" class="form-label small fw-bold text-muted text-uppercase">Location</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-geo-alt text-muted"></i>
+                                </span>
+                                <input asp-for="Location" class="form-control border-start-0" placeholder=" " />
+                            </div>
+                            <span asp-validation-for="Location" class="text-danger small"></span>
+                        </div>
+
+                        <!-- IsActive -->
+                        <div class="mb-4 form-check">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                            <label asp-for="IsActive" class="form-check-label">Active</label>
+                            <span asp-validation-for="IsActive" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success px-4 shadow-sm">
+                                <i class="bi bi-check-lg"></i> Save Branch
+                            </button>
+                            <a asp-controller="Branch" asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

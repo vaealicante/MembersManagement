@@ -1,28 +1,31 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MembersManagement.Application.AppBranchModule.BranchApplicationInterface;
+using MembersManagement.Application.AppMemberModule.ApplicationInterface;
+using MembersManagement.Domain.DomBranchModule.BranchEntities;
 using MembersManagement.Domain.DomMemberModule.Entities;
 using MembersManagement.Web.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
-using MembersManagement.Application.AppMemberModule.ApplicationInterface;
-using MembersManagement.Application.AppBranchModule.BranchApplicationInterface;
 
 namespace MembersManagement.Web.Controllers
 {
-    // Using the Primary Constructor syntax to inject both required services
-    public class MemberController(
-        IMemberService memberService,
-        IBranchService branchService) : Controller
+    public class MemberController : Controller
     {
-        private readonly IMemberService _memberService = memberService;
-        private readonly IBranchService _branchService = branchService;
+        private readonly IMemberService _memberService;
+        private readonly IBranchService _branchService;
 
-        // ================= INDEX =================
+        public MemberController(IMemberService memberService, IBranchService branchService)
+        {
+            _memberService = memberService;
+            _branchService = branchService;
+        }
+
+        // ================= INDEX (List & Filter) =================
         public IActionResult Index(string? search, string? branch, int page = 1, int pageSize = 5)
         {
             var allMembers = _memberService.GetMembers().ToList();
 
-            // Use the Branch service to get all possible branches for the dropdown
-            ViewBag.Branches = _branchService.GetAllBranches()
+            ViewBag.BranchesList = _branchService.GetAllBranches()
                 .Select(b => b.BranchName.Trim().ToUpper())
                 .Distinct()
                 .OrderBy(b => b)
@@ -30,14 +33,12 @@ namespace MembersManagement.Web.Controllers
 
             var members = allMembers.AsEnumerable();
 
-            // Search Logic
             if (!string.IsNullOrWhiteSpace(search))
             {
                 members = members.Where(m =>
                     m.LastName.Contains(search, StringComparison.OrdinalIgnoreCase));
             }
 
-            // Filter by Branch Logic
             if (!string.IsNullOrWhiteSpace(branch))
             {
                 members = members.Where(m =>
@@ -58,7 +59,6 @@ namespace MembersManagement.Web.Controllers
                     LastName = m.LastName,
                     BirthDate = m.BirthDate?.ToDateTime(TimeOnly.MinValue),
                     Address = m.Address ?? "",
-                    // Display the name of the branch in the list
                     Branch = m.Branch?.BranchName ?? "N/A",
                     ContactNo = m.ContactNo ?? "",
                     Email = m.Email ?? "",
@@ -75,11 +75,36 @@ namespace MembersManagement.Web.Controllers
             return View(membersToShow);
         }
 
-        // ================= CREATE (POST) =================
+        // ================= BRANCH INDEX =================
+        [HttpGet]
+        public IActionResult BranchIndex()
+        {
+            var branches = _branchService.GetAllBranches()
+                .OrderBy(b => b.BranchName)
+                .ToList();
+
+            // Tell MVC the full path
+            return View("~/Views/Branch/BranchIndex.cshtml", branches);
+        }
+
+
+        // ================= CREATE MEMBER =================
+        [HttpGet]
+        public IActionResult Create()
+        {
+            PopulateBranches();
+            return View(new MemberViewModel());
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(MemberViewModel model)
         {
+            var selectedBranch = GetBranchByName(model.Branch);
+
+            if (selectedBranch == null)
+                ModelState.AddModelError("Branch", "The branch name entered is invalid. Please select from the list.");
+
             if (!ModelState.IsValid)
             {
                 PopulateBranches();
@@ -94,8 +119,7 @@ namespace MembersManagement.Web.Controllers
                     LastName = model.LastName ?? string.Empty,
                     BirthDate = model.BirthDate.HasValue ? DateOnly.FromDateTime(model.BirthDate.Value) : null,
                     Address = model.Address,
-                    // Map the Foreign Key ID from the ViewModel
-                    BranchId = model.BranchId,
+                    BranchId = selectedBranch!.BranchId,
                     ContactNo = model.ContactNo,
                     Email = model.Email,
                     IsActive = true,
@@ -103,22 +127,51 @@ namespace MembersManagement.Web.Controllers
                 };
 
                 _memberService.CreateMember(member);
-                TempData["SuccessMessage"] = "Member created successfully.";
+                TempData["SuccessMessage"] = "Member created successfully!";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Internal Error: " + ex.Message);
+                ModelState.AddModelError("", "Database Error: " + ex.InnerException?.Message ?? ex.Message);
                 PopulateBranches();
                 return View(model);
             }
         }
 
-        // ================= EDIT (POST) =================
+        // ================= EDIT MEMBER =================
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var member = _memberService.GetMember(id);
+            if (member == null) return NotFound();
+
+            PopulateBranches();
+
+            var model = new MemberViewModel
+            {
+                MemberID = member.MemberID,
+                FirstName = member.FirstName,
+                LastName = member.LastName,
+                BirthDate = member.BirthDate?.ToDateTime(TimeOnly.MinValue),
+                Address = member.Address,
+                ContactNo = member.ContactNo,
+                Email = member.Email,
+                IsActive = member.IsActive,
+                Branch = member.Branch?.BranchName
+            };
+
+            return View(model);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(MemberViewModel model)
         {
+            var selectedBranch = GetBranchByName(model.Branch);
+
+            if (selectedBranch == null && !string.IsNullOrEmpty(model.Branch))
+                ModelState.AddModelError("Branch", "Selected branch does not exist.");
+
             if (!ModelState.IsValid)
             {
                 PopulateBranches();
@@ -132,9 +185,9 @@ namespace MembersManagement.Web.Controllers
             member.LastName = model.LastName ?? string.Empty;
             member.BirthDate = model.BirthDate.HasValue ? DateOnly.FromDateTime(model.BirthDate.Value) : null;
             member.Address = model.Address;
-            member.BranchId = model.BranchId;
             member.ContactNo = model.ContactNo;
             member.Email = model.Email;
+            member.BranchId = selectedBranch?.BranchId ?? member.BranchId;
             member.IsActive = model.IsActive;
 
             _memberService.UpdateMember(member);
@@ -142,12 +195,35 @@ namespace MembersManagement.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // ================= SOFT DELETE =================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(int id)
+        {
+            var member = _memberService.GetMember(id);
+            if (member == null) return NotFound();
+
+            member.IsActive = false;
+            _memberService.UpdateMember(member);
+
+            TempData["SuccessMessage"] = "Member deactivated.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // ================= HELPERS =================
         private void PopulateBranches()
         {
-            // Fetch list of branches to populate dropdowns in Create/Edit views
             ViewBag.Branches = _branchService.GetAllBranches()
-                .OrderBy(b => b.BranchName)
+                .Select(b => b.BranchName)
+                .OrderBy(b => b)
                 .ToList();
+        }
+
+        private Branch? GetBranchByName(string? name)
+        {
+            if (string.IsNullOrEmpty(name)) return null;
+            return _branchService.GetAllBranches()
+                .FirstOrDefault(b => b.BranchName.Trim().Equals(name.Trim(), StringComparison.OrdinalIgnoreCase));
         }
     }
 }

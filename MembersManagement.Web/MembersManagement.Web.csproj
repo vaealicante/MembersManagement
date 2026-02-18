@@ -22,4 +22,8 @@
     <ProjectReference Include="..\MembersManagement.Infrastructure\MembersManagement.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\js\Branch\" />
+  </ItemGroup>
+
 </Project>
