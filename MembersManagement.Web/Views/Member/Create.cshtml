@@ -1,14 +1,19 @@
 ﻿@model MembersManagement.Web.ViewModels.MemberViewModel
+@using MembersManagement.Domain.DomBranchModule.BranchEntities
 
 @{
     ViewData["Title"] = "Create New Member";
 }
+
 <div class="card shadow-sm border-0 rounded-3">
     <div class="card-header bg-dark text-white py-3">
         <h5 class="card-title mb-0"><i class="bi bi-person-plus me-2"></i> @ViewData["Title"]</h5>
     </div>
     <div class="card-body p-4">
-        <form asp-action="Create" method="post" novalidate>
+        <form asp-controller="Member" asp-action="Create" method="post" novalidate>
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
             <div class="row g-3">
                 <div class="col-md-6">
@@ -29,20 +34,14 @@
                     <span asp-validation-for="BirthDate" class="text-danger small"></span>
                 </div>
 
-                <div class="col-md-6">
-                    <label asp-for="Branch" class="form-label small fw-bold text-uppercase text-muted"></label>
-                    <input asp-for="Branch" class="form-control" list="branchOptions" placeholder="Input Branch" />
-                    <datalist id="branchOptions">
-                        @if (ViewBag.Branches != null)
-                        {
-                            foreach (var b in ViewBag.Branches)
-                            {
-                                <option value="@b"></option>
-                            }
-                        }
-                    </datalist>
-                    <span asp-validation-for="Branch" class="text-danger small"></span>
-                </div>
+               <div class="mb-4">
+    <label asp-for="BranchId" class="form-label small fw-bold text-muted">ASSIGN BRANCH</label>
+   <select asp-for="BranchId" class="form-select" 
+        asp-items="@(new SelectList(ViewBag.Branches ?? new List<Branch>(), "BranchId", "BranchName"))">
+    <option value="">-- Select Branch --</option>
+</select>
+    <span asp-validation-for="BranchId" class="text-danger small"></span>
+</div>
 
                 <div class="col-md-6">
                     <label asp-for="ContactNo" class="form-label small fw-bold text-uppercase text-muted"></label>
@@ -77,11 +76,9 @@
                     <i class="bi bi-save me-2"></i>Save Member
                 </button>
             </div>
-
         </form>
     </div>
 </div>
-
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

@@ -1,14 +1,18 @@
-﻿@model IEnumerable<MembersManagement.Web.ViewModels.MemberViewModel>
+﻿@using System.Linq
+@model IEnumerable<MembersManagement.Web.ViewModels.MemberViewModel>
 
 @{
     ViewData["Title"] = "Members";
 
-    int currentPage = ViewBag.CurrentPage;
-    int totalPages = ViewBag.TotalPages;
-    string searchTerm = ViewBag.SearchTerm;
-    string currentBranch = ViewBag.CurrentBranch;
-    var branches = ViewBag.Branches as List<string> ?? new List<string>();
-    int pageSize = ViewBag.PageSize;
+    int currentPage = ViewBag.CurrentPage as int? ?? 1;
+    int totalPages = ViewBag.TotalPages as int? ?? 1;
+    string searchTerm = ViewBag.SearchTerm as string ?? "";
+    string currentBranch = ViewBag.CurrentBranch as string ?? "";
+
+    // FIX: Synced with Controller's "BranchesList"
+    var branches = ViewBag.BranchesList as List<string> ?? new List<string>();
+
+    int pageSize = ViewBag.PageSize as int? ?? 10;
 }
 
 @section Styles {
@@ -19,7 +23,7 @@
 <div class="container-fluid">
     <h2 class="my-4">Members List</h2>
 
-    @* NOTIFICATION SYSTEM *@
+    @* SUCCESS MESSAGE *@
     @if (TempData["SuccessMessage"] != null)
     {
         <div id="success-alert" class="alert-container">
@@ -34,202 +38,208 @@
 
     @* ACTION BUTTONS *@
     <div class="mb-3 d-flex gap-2">
-        <!-- Create New Member -->
         <a asp-controller="Member" asp-action="Create" class="btn btn-success btn-sm shadow-sm">
             <i class="bi bi-person-plus-fill"></i> Create New Member
         </a>
-
-        <!-- View Branch List -->
         <a asp-controller="Branch" asp-action="Index" class="btn btn-primary btn-sm shadow-sm">
             <i class="bi bi-building-gear"></i> Branches
         </a>
     </div>
 
-    @* FILTER & SEARCH FORM *@
+    @* FILTER & SEARCH *@
     <div class="card shadow-sm mb-4 filter-container">
         <div class="card-body">
             <form id="filterForm" method="get">
-                <input type="hidden" name="page" id="currentPageInput" value="1" />
+                <input type="hidden" name="page" value="1" />
+                <input type="hidden" name="pageSize" value="@pageSize" />
+
                 <div class="d-flex flex-wrap gap-3 align-items-end">
-                    <!-- SEARCH INPUT -->
-                    <div style="flex: 2; min-width: 250px;">
-                        <label class="small text-muted fw-bold text-uppercase d-block mb-1">SEARCH</label>
+                    <div style="flex:2; min-width:250px;">
+                        <label class="small text-muted fw-bold">SEARCH</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0">
-                                <i class="bi bi-search text-muted"></i>
-                            </span>
-                            <input name="search" class="form-control border-start-0"
-                                   placeholder="Search Last Name..." value="@searchTerm" />
+                            <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                            <input name="search" class="form-control" placeholder="Search Last Name..." value="@searchTerm" />
                         </div>
                     </div>
 
-                    <!-- SEARCHABLE BRANCH -->
-                    <div style="flex: 1; min-width: 200px;">
-                        <label class="small text-muted fw-bold text-uppercase d-block mb-1">Branch</label>
+                    <div style="flex:1; min-width:200px;">
+                        <label class="small text-muted fw-bold">BRANCH</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0">
-                                <i class="bi bi-geo-alt text-muted"></i>
-                            </span>
-                            <input name="branch"
-                                   list="branchOptions"
-                                   class="form-control border-start-0"
-                                   placeholder="Filter Branch..."
-                                   value="@currentBranch" />
+                            <span class="input-group-text bg-light"><i class="bi bi-geo-alt"></i></span>
+                            <input name="branch" list="branchOptions" class="form-control" placeholder="Filter Branch..." value="@currentBranch" />
                             <datalist id="branchOptions">
                                 @foreach (var b in branches)
                                 {
-                                    <option value="@b">@b</option>
+                                    <option value="@b"></option>
                                 }
                             </datalist>
-                            <button class="btn btn-outline-secondary" type="submit">
-                                <i class="bi bi-funnel"></i>
-                            </button>
+                            <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-funnel"></i></button>
                         </div>
                     </div>
 
-                    <!-- RESET BUTTON -->
-                    <div class="d-flex gap-2">
-                        <a asp-action="Index" class="btn btn-outline-secondary px-4 shadow-sm">Reset</a>
+                    <div>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4">Reset</a>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 
-    @* MEMBER DATA TABLE *@
+    @* TABLE *@
     <div class="table-responsive shadow-sm border rounded">
-        <table class="table table-hover table-striped mb-0 custom-table">
+        <table class="table table-hover table-striped mb-0">
             <thead class="table-dark">
                 <tr>
-                    <th class="col-id">ID</th>
-                    <th class="col-name">First Name</th>
-                    <th class="col-name">Last Name</th>
-                    <th class="col-date">Birth Date</th>
-                    <th class="col-address">Address</th>
-                    <th class="col-branch">Branch</th>
-                    <th class="col-contact">Contact Number</th>
-                    <th class="col-email">Email Address</th>
-                    <th class="text-center col-actions">Actions</th>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Birth Date</th>
+                    <th>Address</th>
+                    <th>Branch</th>
+                    <th>Contact</th>
+                    <th>Email</th>
+                    <th class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @if (!Model.Any())
+                @if (!(Model?.Any() ?? false))
                 {
                     <tr>
                         <td colspan="9" class="text-center text-muted py-5">
-                            <i class="bi bi-search d-block mb-2" style="font-size: 2rem;"></i>
+                            <i class="bi bi-search d-block mb-2 fs-3"></i>
                             No members match your criteria.
                         </td>
                     </tr>
                 }
-                @foreach (var m in Model)
+                else
                 {
-                    <tr>
-                        <td class="text-center fw-bold">@m.MemberID</td>
-                        <td title="@m.FirstName">@m.FirstName</td>
-                        <td title="@m.LastName">@m.LastName</td>
-                        <td>@(m.BirthDate.HasValue? m.BirthDate.Value.ToString("MM-dd-yyyy") : "")</td>
-                        <td title="@m.Address">@m.Address</td>
-                        <td title="@m.Branch">@m.Branch</td>
-                        <td title="@m.ContactNo">@m.ContactNo</td>
-                        <td title="@m.Email">@m.Email</td>
-                        <td class="text-center">
-                            <div class="d-flex justify-content-center gap-2">
-                                <a asp-action="Edit" asp-route-id="@m.MemberID" class="btn btn-outline-warning btn-action" title="Edit">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <a asp-action="Details" asp-route-id="@m.MemberID" class="btn btn-outline-info btn-action" title="View">
-                                    <i class="bi bi-list-ul"></i>
-                                </a>
-                                <button type="button" class="btn btn-outline-danger btn-action"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteModal"
-                                        data-member-id="@m.MemberID"
-                                        data-member-name="@m.FirstName @m.LastName"
-                                        title="Delete">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                    @foreach (var m in Model!)
+                    {
+                        <tr>
+                            <td class="fw-bold">@m.MemberID</td>
+                            <td>@m.FirstName</td>
+                            <td>@m.LastName</td>
+                            <td>@(m.BirthDate?.ToString("MM-dd-yyyy") ?? "")</td>
+                            <td>@m.Address</td>
+                            <td>@m.Branch</td>
+                            <td>@m.ContactNo</td>
+                            <td>@m.Email</td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a asp-action="Edit" asp-route-id="@m.MemberID" class="btn btn-outline-warning btn-sm">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@m.MemberID" class="btn btn-outline-info btn-sm">
+                                        <i class="bi bi-list"></i>
+                                    </a>
+                                    <button class="btn btn-outline-danger btn-sm delete-button"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal"
+                                            data-member-id="@m.MemberID"
+                                            data-member-name="@($"{m.FirstName} {m.LastName}")">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>
     </div>
 
-    @* FOOTER: PAGINATION & PAGE SIZE SELECTOR *@
-    <div class="d-flex justify-content-between align-items-center mt-3 bg-light p-2 border rounded w-100">
-        <div class="flex-grow-1">
+    @* PAGINATION *@
+    <div class="d-flex justify-content-between align-items-center mt-3 p-2 bg-light border rounded">
+        <div>
             @if (totalPages > 1)
             {
-                <nav>
-                    <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage - 1, pageSize = pageSize })">Previous</a>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage - 1, pageSize })">Previous</a>
+                    </li>
+
+                    @for (int i = Math.Max(1, currentPage - 1); i <= Math.Min(totalPages, currentPage + 1); i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = i, pageSize })">@i</a>
                         </li>
+                    }
 
-                        @{
-                            int maxPagesToShow = 3;
-                            int startPage = Math.Max(1, currentPage - 1);
-                            int endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
-                            if (endPage - startPage + 1 < maxPagesToShow) { startPage = Math.Max(1, endPage - maxPagesToShow + 1); }
-                        }
-
-                        @for (int i = startPage; i <= endPage; i++)
-                        {
-                            <li class="page-item @(i == currentPage ? "active" : "")">
-                                <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = i, pageSize = pageSize })">@i</a>
-                            </li>
-                        }
-
-                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                            <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage + 1, pageSize = pageSize })">Next</a>
-                        </li>
-                    </ul>
-                </nav>
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { search = searchTerm, branch = currentBranch, page = currentPage + 1, pageSize })">Next</a>
+                    </li>
+                </ul>
             }
             else
             {
-                <span class="text-muted small ms-2">All records displayed</span>
+                <span class="text-muted small">All records displayed</span>
             }
         </div>
 
         <div class="d-flex align-items-center">
-            <span class="text-muted small me-2">Rows per page:</span>
-            <select name="pageSize" id="pageSizeSelector" form="filterForm" class="form-select form-select-sm" style="width: 80px;">
-                <option value="5" selected="@(pageSize == 5)">5</option>
-                <option value="10" selected="@(pageSize == 10)">10</option>
-                <option value="15" selected="@(pageSize == 15)">15</option>
-                <option value="20" selected="@(pageSize == 20)">20</option>
-                <option value="0" selected="@(pageSize == 0)">All</option>
+            <span class="me-2 small">Rows:</span>
+
+            <select id="pageSizeSelector"
+                    name="pageSize"
+                    form="filterForm"
+                    class="form-select form-select-sm"
+                    style="width: 80px;"
+                    value="@pageSize">
+
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="0">All</option>
+
             </select>
         </div>
     </div>
 </div>
 
-@* DELETE MODAL *@
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+<!-- =========================
+     DELETE MODAL
+========================= -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">Confirm Deletion</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body">
-                <p id="modal-body-text" class="fw-bold"></p>
-                <p class="text-muted small">This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <form asp-action="Delete" method="post">
+                <p id="modal-body-text"></p>
+
+                <form id="deleteForm"
+                      asp-controller="Member"
+                      asp-action="Delete"
+                      method="post">
+                    @Html.AntiForgeryToken()
                     <input type="hidden" id="memberIdInput" name="id" />
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger btn-sm">Confirm Delete</button>
                 </form>
             </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <button type="button"
+                        id="confirmDeleteBtn"
+                        class="btn btn-danger btn-sm">
+                    Confirm Delete
+                </button>
+            </div>
+
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <script src="~/js/MemberIndex.js"></script>
-}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/MemberIndex.js"></script>

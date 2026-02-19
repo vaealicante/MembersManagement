@@ -31,20 +31,14 @@
                     <span asp-validation-for="BirthDate" class="text-danger small"></span>
                 </div>
 
-                <div class="col-md-6">
-                    <label asp-for="Branch" class="form-label small fw-bold text-uppercase text-muted"></label>
-                    <input asp-for="Branch" class="form-control" list="branchOptions" placeholder="Input Branch" />
-                    <datalist id="branchOptions">
-                        @if (ViewBag.Branches != null)
-                        {
-                            foreach (var b in ViewBag.Branches)
-                            {
-                                <option value="@b"></option>
-                            }
-                        }
-                    </datalist>
-                    <span asp-validation-for="Branch" class="text-danger small"></span>
-                </div>
+               <div class="mb-4">
+    <label asp-for="BranchId" class="form-label small fw-bold text-muted">ASSIGN BRANCH</label>
+    <select asp-for="BranchId" class="form-select" 
+        asp-items="@(new SelectList(ViewBag.Branches ?? new List<MembersManagement.Domain.DomBranchModule.BranchEntities.Branch>(), "BranchId", "BranchName"))">
+    <option value="">-- Select Branch --</option>
+</select>
+    <span asp-validation-for="BranchId" class="text-danger small"></span>
+</div>
 
                 <div class="col-md-6">
                     <label asp-for="ContactNo" class="form-label small fw-bold text-uppercase text-muted"></label>
