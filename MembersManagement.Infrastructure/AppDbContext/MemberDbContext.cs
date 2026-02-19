@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MembersManagement.Domain.DomBranchModule.BranchEntities;
 using MembersManagement.Domain.DomMemberModule.Entities;
+using MembersManagement.Domain.DomMembershipModule.MembershipEntities;
 
 namespace MembersManagement.Infrastructure.AppDbContext
 {
@@ -11,6 +12,7 @@ namespace MembersManagement.Infrastructure.AppDbContext
 
         public DbSet<Member> Members { get; set; }
         public DbSet<Branch> Branches { get; set; }
+        public DbSet<Membership> Memberships { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +44,14 @@ namespace MembersManagement.Infrastructure.AppDbContext
                       .WithMany()               // no navigation collection on Branch
                       .HasForeignKey(m => m.BranchId)
                       .OnDelete(DeleteBehavior.Restrict); // ✅ safer than SetNull
+            });
+
+            modelBuilder.Entity<Membership>(entity =>
+            {
+                entity.HasKey(s => s.MembershipId);
+
+                entity.Property(s => s.MembershipName)
+                .IsRequired();
             });
         }
     }
