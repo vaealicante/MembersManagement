@@ -8,13 +8,20 @@ using MembersManagement.Application.AppMemberModule.ApplicationInterface;
 using MembersManagement.Application.AppMemberModule.BusinessLogic;
 using MembersManagement.Application.AppMemberModule.Services;
 using MembersManagement.Application.AppMemberModule.Validators;
+using MembersManagement.Application.AppMembershipModule.MembershipApplicationInterface;
+using MembersManagement.Application.AppMembershipModule.MembershipBusinessLogic;
+using MembersManagement.Application.AppMembershipModule.MembershipServices;
+using MembersManagement.Application.AppMembershipModule.MembershipValidators;
 using MembersManagement.Domain.DomBranchModule.BranchEntities;
 using MembersManagement.Domain.DomBranchModule.BranchInterfaces;
 using MembersManagement.Domain.DomMemberModule.Entities;
 using MembersManagement.Domain.DomMemberModule.Interfaces;
+using MembersManagement.Domain.DomMembershipModule.MembershipEntities;
+using MembersManagement.Domain.DomMembershipModule.MembershipInterface;
 using MembersManagement.Infrastructure.AppDbContext;
 using MembersManagement.Infrastructure.InfraBranchModule.BranchRepositoryImplementation;
 using MembersManagement.Infrastructure.InfraMemberModule.RepositoryImplementation;
+using MembersManagement.Infrastructure.InfraMembershipModule.MembershipRepositoryImplementation;
 using MembersManagement.Web.ValidatorsVM;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,18 +41,22 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Repository
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IBranchRepository, BranchRepository>();
+builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
 
 // Business Logic
 builder.Services.AddScoped<MemberManager>();
 builder.Services.AddScoped<BranchManager>();
+builder.Services.AddScoped<MembershipManager>();
 
 // FluentValidation
 builder.Services.AddScoped<IValidator<Member>, MemberValidation>();
 builder.Services.AddScoped<IValidator<Branch>, BranchValidation>();
+builder.Services.AddScoped<IValidator<Membership>, MembershipValidation>();
 
 //Service
 builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddScoped<IBranchService, BranchService>();
+builder.Services.AddScoped<IMembershipService, MembershipService>();
 
 var app = builder.Build();
 

@@ -1,4 +1,5 @@
 ﻿using MembersManagement.Domain.DomBranchModule.BranchEntities;
+using MembersManagement.Domain.DomMembershipModule.MembershipEntities;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MembersManagement.Domain.DomMemberModule.Entities
@@ -7,6 +8,8 @@ namespace MembersManagement.Domain.DomMemberModule.Entities
     {
         public int MemberID { get; set; }
 
+        public int MembershipId { get; set; }
+        public Membership Membership { get; set; } = null!;
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public DateOnly? BirthDate { get; set; }
