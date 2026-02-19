@@ -1,81 +1,72 @@
-﻿/**
- * MemberIndex.js - Logic for Member Index Page
- */
-document.addEventListener("DOMContentLoaded", function () {
-    // DOM Elements
-    const filterForm = document.getElementById('filterForm');
-    const branchSelect = document.getElementById('branchSelect');
-    const pageSizeSelector = document.getElementById('pageSizeSelector');
-    const successAlert = document.getElementById('success-alert');
-    const deleteModal = document.getElementById('deleteModal');
-    const currentPageInput = document.getElementById('currentPageInput');
+﻿document.addEventListener("DOMContentLoaded", function () {
 
-    /**
-     * Helper: Reset to page 1 and submit form.
-     */
-    const refreshTable = () => {
-        if (currentPageInput) {
-            currentPageInput.value = 1;
-        }
-        if (filterForm) {
-            filterForm.submit();
-        }
-    };
+    /* =========================
+       DELETE MODAL LOGIC
+    ========================== */
+    const deleteButtons = document.querySelectorAll(".delete-button");
+    const modalBodyText = document.getElementById("modal-body-text");
+    const memberIdInput = document.getElementById("memberIdInput");
+    const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+    const deleteForm = document.getElementById("deleteForm");
+    const deleteModalEl = document.getElementById("deleteModal");
 
-    // 1. Success Alert Auto-Fade Logic
-    if (successAlert) {
-        setTimeout(function () {
-            successAlert.style.transition = "opacity 0.6s ease, transform 0.6s ease";
-            successAlert.style.opacity = "0";
-            successAlert.style.transform = "translate(-50%, -20px)";
+    // Initialize Bootstrap modal instance
+    const deleteModal = deleteModalEl ? new bootstrap.Modal(deleteModalEl, { backdrop: 'static', keyboard: false }) : null;
 
+    // When a table delete button is clicked
+    deleteButtons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const memberId = this.dataset.memberId;
+            const memberName = this.dataset.memberName;
+
+            // Fill modal
+            memberIdInput.value = memberId;
+            modalBodyText.textContent = `Are you sure you want to delete "${memberName}"?`;
+
+            // Show modal
+            if (deleteModal) deleteModal.show();
+        });
+    });
+
+    // Confirm delete button inside modal
+    if (confirmDeleteBtn && deleteForm) {
+        confirmDeleteBtn.addEventListener("click", function () {
+            if (!memberIdInput.value) {
+                console.error("Member ID is empty. Delete aborted.");
+                return;
+            }
+
+            // Hide modal first to prevent blocking form submit
+            if (deleteModal) deleteModal.hide();
+
+            // Wait 200ms for modal to hide then submit
             setTimeout(() => {
-                successAlert.remove();
-            }, 600);
-        }, 3000);
-    }
-
-    // 2. Branch Dropdown Auto-Submit
-    if (branchSelect) {
-        branchSelect.addEventListener('change', refreshTable);
-    }
-
-    // 3. Page Size Selector Auto-Submit
-    if (pageSizeSelector) {
-        pageSizeSelector.addEventListener('change', refreshTable);
-    }
-
-    // 4. Delete Modal Logic
-    if (deleteModal) {
-        deleteModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const memberId = button.getAttribute('data-member-id');
-            // Fallback to "this member" if name is missing/optional
-            const memberName = button.getAttribute('data-member-name') || "this member";
-
-            const modalBodyText = deleteModal.querySelector('#modal-body-text');
-            const memberIdInput = deleteModal.querySelector('#memberIdInput');
-
-            if (modalBodyText) {
-                modalBodyText.textContent = `Are you sure you want to delete member "${memberName}"?`;
-            }
-            if (memberIdInput) {
-                memberIdInput.value = memberId;
-            }
+                deleteForm.submit();
+            }, 200);
         });
     }
 
-    // 5. URL Optimization (Clean URL parameters)
-    if (filterForm) {
-        filterForm.addEventListener('submit', function () {
-            const inputs = filterForm.querySelectorAll('input, select');
-            inputs.forEach(input => {
-                // Only disable if it's an empty text search. 
-                // We keep selects enabled if they are part of the core filtering.
-                if (!input.value && input.tagName === 'INPUT') {
-                    input.disabled = true;
-                }
-            });
-        });
+    /* =========================
+       AUTO-HIDE SUCCESS ALERT
+    ========================== */
+    const successAlert = document.getElementById("success-alert");
+    if (successAlert) {
+        setTimeout(() => {
+            successAlert.remove();
+        }, 5000);
+    }
+
+    /* =========================
+       PAGE SIZE HANDLING
+    ========================== */
+    const pageSizeSelector = document.getElementById("pageSizeSelector");
+    const filterForm = document.getElementById("filterForm");
+
+    if (pageSizeSelector && filterForm) {
+        const params = new URLSearchParams(window.location.search);
+        const pageSize = params.get("pageSize");
+        if (pageSize !== null) pageSizeSelector.value = pageSize;
+
+        pageSizeSelector.addEventListener("change", () => filterForm.submit());
     }
 });

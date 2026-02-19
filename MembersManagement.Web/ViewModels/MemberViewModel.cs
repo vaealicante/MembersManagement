@@ -25,7 +25,8 @@ namespace MembersManagement.Web.ViewModels
 
         public string? Address { get; set; } = string.Empty;
         public int? BranchId { get; set; }
-        public string? Branch { get; set; } = string.Empty;
+        public string? Branch { get; set; }  // BranchName
+         
         public string? ContactNo { get; set; } = string.Empty;
         public string? Email { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;

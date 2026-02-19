@@ -14,6 +14,8 @@ namespace MembersManagement.Infrastructure.AppDbContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             // ===== BRANCH CONFIGURATION =====
             modelBuilder.Entity<Branch>(entity =>
             {
@@ -32,14 +34,15 @@ namespace MembersManagement.Infrastructure.AppDbContext
             {
                 entity.HasKey(m => m.MemberID);
 
-                // This establishes the physical Foreign Key in the database
-                entity.HasOne(m => m.Branch)
-                      .WithMany()
-                      .HasForeignKey(m => m.BranchId)
-                      .OnDelete(DeleteBehavior.SetNull);
-            });
+                // Ensure FK column is optional (matches int?)
+                entity.Property(m => m.BranchId)
+                      .IsRequired(false);
 
-            base.OnModelCreating(modelBuilder);
+                entity.HasOne(m => m.Branch)
+                      .WithMany()               // no navigation collection on Branch
+                      .HasForeignKey(m => m.BranchId)
+                      .OnDelete(DeleteBehavior.Restrict); // ✅ safer than SetNull
+            });
         }
     }
 }

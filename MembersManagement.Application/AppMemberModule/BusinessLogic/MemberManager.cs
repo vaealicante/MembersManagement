@@ -62,15 +62,14 @@ namespace MembersManagement.Application.AppMemberModule.BusinessLogic
         /// </summary>
         public void DeleteMember(int id)
         {
-            var member = _memberRepository.GetById(id)
-                ?? throw new KeyNotFoundException($"Member with ID {id} was not found.");
-
-            member.IsActive = false;
-
-            _memberRepository.Update(member);
-            _memberRepository.SaveChanges();
+            var member = _memberRepository.GetById(id);
+            if (member != null)
+            {
+                member.IsActive = false; // The Soft Delete
+                _memberRepository.Update(member);
+                _memberRepository.SaveChanges();
+            }
         }
-
         /// <summary>
         /// Administrative method to see all records regardless of status.
         /// </summary>
