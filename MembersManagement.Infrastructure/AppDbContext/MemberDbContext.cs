@@ -44,6 +44,11 @@ namespace MembersManagement.Infrastructure.AppDbContext
                       .WithMany()               // no navigation collection on Branch
                       .HasForeignKey(m => m.BranchId)
                       .OnDelete(DeleteBehavior.Restrict); // ✅ safer than SetNull
+
+                entity.HasOne(m => m.Membership)
+                      .WithMany() // Or .WithMany(ms => ms.Members) if you add a collection to Membership
+                      .HasForeignKey(m => m.MembershipId)
+                      .OnDelete(DeleteBehavior.Restrict); // Prevents deleting a membership that has active members
             });
 
             modelBuilder.Entity<Membership>(entity =>

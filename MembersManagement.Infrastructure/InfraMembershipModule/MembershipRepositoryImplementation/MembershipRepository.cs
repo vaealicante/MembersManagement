@@ -4,7 +4,7 @@ using MembersManagement.Domain.DomMembershipModule.MembershipInterface;
 using MembersManagement.Infrastructure.AppDbContext;
 using Microsoft.EntityFrameworkCore;
 
-namespace MembersManagement.Infrastructure.InfraMembershipModule.MembershipRepository
+namespace MembersManagement.Infrastructure.InfraMembershipModule.MembershipRepositoryImplementation
 {
     public class MembershipRepository : IMembershipRepository
 

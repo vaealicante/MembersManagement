@@ -16,16 +16,16 @@ namespace MembersManagement.Infrastructure.InfraMemberModule.RepositoryImplement
             _context = context;
         }
 
-        // Updated with .Include(m => m.Branch)
         public IEnumerable<Member> GetAll()
             => _context.Members
-                       .Include(m => m.Branch) // <--- THIS LOADS THE RELATED BRANCH DATA
+                       .Include(m => m.Branch)
                        .AsNoTracking()
                        .ToList();
 
         public Member? GetById(int id)
             => _context.Members
-                       .Include(m => m.Branch) // Also recommended here for detail views
+                       .Include(m => m.Branch)
+                       .Include(s => s.Membership)
                        .FirstOrDefault(m => m.MemberID == id);
 
         public void Add(Member member)
@@ -33,7 +33,6 @@ namespace MembersManagement.Infrastructure.InfraMemberModule.RepositoryImplement
 
         public void Update(Member member)
         {
-            // Check if the entity is already being tracked to avoid "already tracked" errors
             var trackedEntity = _context.Members.Local.FirstOrDefault(m => m.MemberID == member.MemberID);
             if (trackedEntity != null)
             {
@@ -44,13 +43,22 @@ namespace MembersManagement.Infrastructure.InfraMemberModule.RepositoryImplement
                 _context.Entry(member).State = EntityState.Modified;
             }
         }
+
         public void Delete(int id)
         {
             var member = _context.Members.Find(id);
             if (member != null)
             {
                 _context.Members.Remove(member);
-                // COMMIT THE CHANGE TO THE DATABASE
-                _context.SaveChanges();
+                // We usually call SaveChanges() explicitly from the service,
+                // but if your pattern requires it here, it works too.
             }
         }
+
+        // ✅ ADD THIS TO FIX THE ERROR
+        public void SaveChanges()
+        {
+            _context.SaveChanges();
+        }
+    }
+}
