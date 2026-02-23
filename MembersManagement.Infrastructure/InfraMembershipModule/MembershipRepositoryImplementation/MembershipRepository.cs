@@ -1,42 +1,49 @@
-﻿using MembersManagement.Domain.DomBranchModule.BranchEntities;
-using MembersManagement.Domain.DomMembershipModule.MembershipEntities;
+﻿using MembersManagement.Domain.DomMembershipModule.MembershipEntities;
 using MembersManagement.Domain.DomMembershipModule.MembershipInterface;
 using MembersManagement.Infrastructure.AppDbContext;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MembersManagement.Infrastructure.InfraMembershipModule.MembershipRepositoryImplementation
 {
     public class MembershipRepository : IMembershipRepository
-
     {
-        public void Add(Membership membership)
-        {
-            throw new NotImplementedException();
-        }
+        private readonly MemberDbContext _context;
 
-        public void Delete(int id)
+        public MembershipRepository(MemberDbContext context)
         {
-            throw new NotImplementedException();
+            _context = context;
         }
 
         public IEnumerable<Membership> GetAll()
-        {
-            throw new NotImplementedException();
-        }
+            => _context.Memberships.AsNoTracking().ToList();
 
         public Membership? GetById(int id)
-        {
-            throw new NotImplementedException();
-        }
+            => _context.Memberships
+                       .AsNoTracking()
+                       .FirstOrDefault(m => m.MembershipId == id);
 
-        public void SaveChanges()
+        public void Add(Membership membership)
         {
-            throw new NotImplementedException();
+            _context.Memberships.Add(membership);
         }
 
         public void Update(Membership membership)
         {
-            throw new NotImplementedException();
+            _context.Memberships.Update(membership);
+        }
+
+        public void Delete(int id)
+        {
+            var membership = _context.Memberships.Find(id);
+            if (membership != null)
+                _context.Memberships.Remove(membership);
+        }
+
+        public void SaveChanges()
+        {
+            _context.SaveChanges();
         }
     }
 }

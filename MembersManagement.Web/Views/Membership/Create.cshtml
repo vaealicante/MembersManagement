@@ -1,0 +1,29 @@
+﻿@model MembersManagement.Web.ViewModels.MembershipViewModel
+
+@{
+    ViewData["Title"] = "Create Membership";
+}
+
+<h2>Create Membership</h2>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label asp-for="MembershipName" class="form-label"></label>
+        <input asp-for="MembershipName" class="form-control" />
+        <span asp-validation-for="MembershipName" class="text-danger"></span>
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="IsActive" class="form-check-input" />
+        <label asp-for="IsActive" class="form-check-label">Active</label>
+    </div>
+
+    <button type="submit" class="btn btn-success">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

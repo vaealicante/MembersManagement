@@ -1,9 +1,11 @@
 ﻿using MembersManagement.Application.AppBranchModule.BranchApplicationInterface;
 using MembersManagement.Application.AppMemberModule.ApplicationInterface;
+using MembersManagement.Application.AppMembershipModule.MembershipApplicationInterface;
 using MembersManagement.Domain.DomBranchModule.BranchEntities;
 using MembersManagement.Domain.DomMemberModule.Entities;
 using MembersManagement.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Linq;
 
@@ -13,11 +15,17 @@ namespace MembersManagement.Web.Controllers
     {
         private readonly IMemberService _memberService;
         private readonly IBranchService _branchService;
+        private readonly IMembershipService _membershipService;
 
-        public MemberController(IMemberService memberService, IBranchService branchService)
+        // ✅ FIXED CONSTRUCTOR
+        public MemberController(
+            IMemberService memberService,
+            IBranchService branchService,
+            IMembershipService membershipService)
         {
             _memberService = memberService;
             _branchService = branchService;
+            _membershipService = membershipService;
         }
 
         // ================= INDEX =================
@@ -25,7 +33,6 @@ namespace MembersManagement.Web.Controllers
         {
             var allMembers = _memberService.GetMembers().ToList();
 
-            // Branch dropdown
             ViewBag.BranchesList = _branchService.GetAllBranches()
                 .Select(b => b.BranchName.Trim())
                 .Distinct()
@@ -34,7 +41,6 @@ namespace MembersManagement.Web.Controllers
 
             var members = allMembers.AsEnumerable();
 
-            // SEARCH FILTER
             if (!string.IsNullOrWhiteSpace(search))
             {
                 members = members.Where(m =>
@@ -42,7 +48,6 @@ namespace MembersManagement.Web.Controllers
                     m.FirstName.Contains(search, StringComparison.OrdinalIgnoreCase));
             }
 
-            // BRANCH FILTER
             if (!string.IsNullOrWhiteSpace(branch))
             {
                 members = members.Where(m =>
@@ -51,8 +56,6 @@ namespace MembersManagement.Web.Controllers
             }
 
             int totalMembers = members.Count();
-
-            // HANDLE "ALL"
             bool showAll = pageSize == 0;
 
             int totalPages = showAll
@@ -76,6 +79,7 @@ namespace MembersManagement.Web.Controllers
                     Address = m.Address ?? "",
                     BranchId = m.BranchId,
                     Branch = m.Branch?.BranchName ?? "",
+                    Membership = m.Membership != null ? m.Membership.MembershipName : "",
                     ContactNo = m.ContactNo ?? "",
                     Email = m.Email ?? "",
                     IsActive = m.IsActive,
@@ -97,6 +101,7 @@ namespace MembersManagement.Web.Controllers
         public IActionResult Create()
         {
             PopulateBranches();
+            PopulateMemberships();
             return View(new MemberViewModel());
         }
 
@@ -105,23 +110,23 @@ namespace MembersManagement.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(MemberViewModel model)
         {
-            var selectedBranch = model.BranchId.HasValue
-                ? _branchService.GetAllBranches().FirstOrDefault(b => b.BranchId == model.BranchId)
-                : GetBranchByName(model.Branch);
-
             if (!ModelState.IsValid)
             {
                 PopulateBranches();
+                PopulateMemberships();
                 return View(model);
             }
 
             var member = new Member
             {
-                FirstName = model.FirstName ?? string.Empty,
-                LastName = model.LastName ?? string.Empty,
-                BirthDate = model.BirthDate.HasValue ? DateOnly.FromDateTime(model.BirthDate.Value) : null,
+                FirstName = model.FirstName ?? "",
+                LastName = model.LastName ?? "",
+                BirthDate = model.BirthDate.HasValue
+                    ? DateOnly.FromDateTime(model.BirthDate.Value)
+                    : null,
                 Address = model.Address,
-                BranchId = selectedBranch?.BranchId,
+                MembershipId = model.MembershipId,
+                BranchId = model.BranchId,
                 ContactNo = model.ContactNo,
                 Email = model.Email,
                 IsActive = true,
@@ -130,8 +135,10 @@ namespace MembersManagement.Web.Controllers
 
             _memberService.CreateMember(member);
             TempData["SuccessMessage"] = "Member created successfully.";
+
             return RedirectToAction(nameof(Index));
         }
+
 
         // ================= EDIT (GET) =================
         [HttpGet]
@@ -141,6 +148,7 @@ namespace MembersManagement.Web.Controllers
             if (member == null) return NotFound();
 
             PopulateBranches();
+            PopulateMemberships();
 
             var model = new MemberViewModel
             {
@@ -153,7 +161,7 @@ namespace MembersManagement.Web.Controllers
                 Email = member.Email,
                 IsActive = member.IsActive,
                 BranchId = member.BranchId,
-                Branch = member.Branch?.BranchName
+                MembershipId = member.MembershipId
             };
 
             return View(model);
@@ -164,25 +172,26 @@ namespace MembersManagement.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(MemberViewModel model)
         {
-            var selectedBranch = model.BranchId.HasValue ?
-                _branchService.GetAllBranches().FirstOrDefault(b => b.BranchId == model.BranchId) : GetBranchByName(model.Branch);
-
             if (!ModelState.IsValid)
             {
                 PopulateBranches();
+                PopulateMemberships();
                 return View(model);
             }
 
             var member = _memberService.GetMember(model.MemberID);
             if (member == null) return NotFound();
 
-            member.FirstName = model.FirstName ?? string.Empty;
-            member.LastName = model.LastName ?? string.Empty;
-            member.BirthDate = model.BirthDate.HasValue ? DateOnly.FromDateTime(model.BirthDate.Value) : null;
+            member.FirstName = model.FirstName ?? "";
+            member.LastName = model.LastName ?? "";
+            member.BirthDate = model.BirthDate.HasValue
+                ? DateOnly.FromDateTime(model.BirthDate.Value)
+                : null;
             member.Address = model.Address;
             member.ContactNo = model.ContactNo;
             member.Email = model.Email;
-            member.BranchId = selectedBranch?.BranchId;
+            member.BranchId = model.BranchId;
+            member.MembershipId = model.MembershipId;
             member.IsActive = model.IsActive;
 
             _memberService.UpdateMember(member);
@@ -191,42 +200,42 @@ namespace MembersManagement.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ================= DELETE (POST) =================
-        // POST: Member/Delete
+        // ================= DELETE =================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
-            var member = _memberService.GetMember(id);
-            if (member == null)
-            {
-                return NotFound();
-            }
-
-            // This calls the Manager -> Repository -> SQL Update
             _memberService.DeleteMember(id);
-
-            TempData["SuccessMessage"] = $"Member '{member.FirstName} {member.LastName}' deleted successfully.";
-
-            // CRITICAL: This sends the user back to the list
+            TempData["SuccessMessage"] = "Member deleted successfully.";
             return RedirectToAction(nameof(Index));
         }
 
         // ================= HELPERS =================
         private void PopulateBranches()
         {
-            ViewBag.Branches = _branchService.GetAllBranches()
+            ViewBag.BranchesList = _branchService.GetAllBranches()
                 .Where(b => b.IsActive)
                 .OrderBy(b => b.BranchName)
+                .Select(b => new SelectListItem
+                {
+                    Value = b.BranchId.ToString(),
+                    Text = b.BranchName
+                })
                 .ToList();
         }
 
-        private Branch? GetBranchByName(string? name)
+        private void PopulateMemberships()
         {
-            if (string.IsNullOrWhiteSpace(name)) return null;
-
-            return _branchService.GetAllBranches()
-                .FirstOrDefault(b => b.BranchName.Trim().Equals(name.Trim(), StringComparison.OrdinalIgnoreCase));
+            ViewBag.Memberships = _membershipService
+                .GetAllMemberships()
+                .Where(m => m.IsActive)
+                .OrderBy(m => m.MembershipName)
+                .Select(m => new SelectListItem
+                {
+                    Value = m.MembershipId.ToString(),
+                    Text = m.MembershipName
+                })
+                .ToList();
         }
     }
 }

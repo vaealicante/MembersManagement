@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MembersManagement.Infrastructure.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(MemberDbContext))]
     [Migration("20260219083225_InitialMembershipSchema")]
     partial class InitialMembershipSchema
     {

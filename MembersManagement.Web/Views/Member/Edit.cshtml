@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Edit Member";
 }
+
 <div class="card shadow-sm border-0 rounded-3">
     <div class="card-header bg-dark text-white py-3">
         <h5 class="card-title mb-0"><i class="bi bi-pencil-square me-2"></i> @ViewData["Title"]</h5>
@@ -12,34 +13,49 @@
             <input type="hidden" asp-for="MemberID" />
 
             <div class="row g-3">
+                <!-- First Name -->
                 <div class="col-md-6">
                     <label asp-for="FirstName" class="form-label small fw-bold text-uppercase text-muted"></label>
                     <input asp-for="FirstName" class="form-control" placeholder="Enter First Name" />
                     <span asp-validation-for="FirstName" class="text-danger small"></span>
                 </div>
 
+                <!-- Last Name -->
                 <div class="col-md-6">
                     <label asp-for="LastName" class="form-label small fw-bold text-uppercase text-muted"></label>
                     <input asp-for="LastName" class="form-control" placeholder="Enter Last Name" />
                     <span asp-validation-for="LastName" class="text-danger small"></span>
                 </div>
 
+                <!-- Birth Date -->
                 <div class="col-md-6">
                     <label asp-for="BirthDate" class="form-label small fw-bold text-uppercase text-muted"></label>
                     <input asp-for="BirthDate" type="date" class="form-control"
-                           value="@(Model.BirthDate.HasValue? Model.BirthDate.Value.ToString("yyyy-MM-dd") : "")" />
+                           value="@(Model.BirthDate?.ToString("yyyy-MM-dd") ?? "")" />
                     <span asp-validation-for="BirthDate" class="text-danger small"></span>
                 </div>
 
-               <div class="mb-4">
-    <label asp-for="BranchId" class="form-label small fw-bold text-muted">ASSIGN BRANCH</label>
-    <select asp-for="BranchId" class="form-select" 
-        asp-items="@(new SelectList(ViewBag.Branches ?? new List<MembersManagement.Domain.DomBranchModule.BranchEntities.Branch>(), "BranchId", "BranchName"))">
-    <option value="">-- Select Branch --</option>
-</select>
-    <span asp-validation-for="BranchId" class="text-danger small"></span>
-</div>
+                <!-- Branch Dropdown -->
+                <div class="col-md-6">
+                    <label asp-for="BranchId" class="form-label small fw-bold text-muted">Assign Branch</label>
+                    <select asp-for="BranchId" class="form-select"
+                            asp-items="@(new SelectList(ViewBag.Branches ?? new List<MembersManagement.Domain.DomBranchModule.BranchEntities.Branch>(), "BranchId", "BranchName", Model.BranchId))">
+                        <option value="">-- Select Branch --</option>
+                    </select>
+                    <span asp-validation-for="BranchId" class="text-danger small"></span>
+                </div>
 
+                <!-- Membership Dropdown -->
+                <div class="col-md-6">
+                    <label asp-for="MembershipId" class="form-label small fw-bold text-muted">Membership</label>
+                    <select asp-for="MembershipId" class="form-select"
+                            asp-items="@(new SelectList(ViewBag.Memberships ?? new List<MembersManagement.Domain.DomMembershipModule.MembershipEntities.Membership>(), "MembershipId", "MembershipName", Model.MembershipId))">
+                        <option value="">-- Select Membership --</option>
+                    </select>
+                    <span asp-validation-for="MembershipId" class="text-danger small"></span>
+                </div>
+
+                <!-- Contact Number -->
                 <div class="col-md-6">
                     <label asp-for="ContactNo" class="form-label small fw-bold text-uppercase text-muted"></label>
                     <div class="input-group">
@@ -49,6 +65,7 @@
                     <span asp-validation-for="ContactNo" class="text-danger small"></span>
                 </div>
 
+                <!-- Email -->
                 <div class="col-md-6">
                     <label asp-for="Email" class="form-label small fw-bold text-uppercase text-muted"></label>
                     <div class="input-group">
@@ -58,12 +75,14 @@
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
 
+                <!-- Address -->
                 <div class="col-12">
                     <label asp-for="Address" class="form-label small fw-bold text-uppercase text-muted"></label>
                     <textarea asp-for="Address" class="form-control" rows="2" placeholder="Enter Complete Address"></textarea>
                     <span asp-validation-for="Address" class="text-danger small"></span>
                 </div>
 
+                <!-- Member Status -->
                 <div class="col-12">
                     <div class="form-check form-switch mt-2">
                         <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch">

@@ -10,7 +10,6 @@ namespace MembersManagement.Application.AppMembershipModule.MembershipServices
         private readonly IMembershipRepository _repository;
         private readonly IValidator<Membership> _validator;
 
-        // Inject the Repository and Validator via Constructor
         public MembershipService(IMembershipRepository repository, IValidator<Membership> validator)
         {
             _repository = repository;
@@ -19,42 +18,37 @@ namespace MembersManagement.Application.AppMembershipModule.MembershipServices
 
         public void CreateMembership(Membership membership)
         {
-            // 1. Validate the data
-            var validationResult = _validator.Validate(membership);
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationException(validationResult.Errors);
-            }
+            _validator.ValidateAndThrow(membership);
 
-            // 2. Set defaults if needed
-            membership.DateCreated = DateTime.Now;
             membership.IsActive = true;
+            membership.DateCreated = DateTime.UtcNow;
 
-            // 3. Save to Database
             _repository.Add(membership);
-        }
-
-        public IEnumerable<Membership> GetAllMemberships()
-        {
-            return _repository.GetAll();
-        }
-
-        public Membership? GetMembership(int id)
-        {
-            return _repository.GetById(id);
+            _repository.SaveChanges();   // ✅ REQUIRED
         }
 
         public void UpdateMembership(Membership membership)
         {
-            var validationResult = _validator.Validate(membership);
-            if (!validationResult.IsValid) throw new ValidationException(validationResult.Errors);
+            _validator.ValidateAndThrow(membership);
 
             _repository.Update(membership);
+            _repository.SaveChanges();   // ✅ REQUIRED
         }
 
         public void DeleteMembership(int id)
         {
-            _repository.Delete(id);
+            var membership = _repository.GetById(id)
+                ?? throw new KeyNotFoundException("Membership not found");
+
+            membership.IsActive = false; // soft delete
+            _repository.Update(membership);
+            _repository.SaveChanges();   // ✅ REQUIRED
         }
+
+        public IEnumerable<Membership> GetAllMemberships()
+            => _repository.GetAll();
+
+        public Membership? GetMembership(int id)
+            => _repository.GetById(id);
     }
 }

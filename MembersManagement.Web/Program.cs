@@ -9,7 +9,6 @@ using MembersManagement.Application.AppMemberModule.BusinessLogic;
 using MembersManagement.Application.AppMemberModule.Services;
 using MembersManagement.Application.AppMemberModule.Validators;
 using MembersManagement.Application.AppMembershipModule.MembershipApplicationInterface;
-using MembersManagement.Application.AppMembershipModule.MembershipBusinessLogic;
 using MembersManagement.Application.AppMembershipModule.MembershipServices;
 using MembersManagement.Application.AppMembershipModule.MembershipValidators;
 using MembersManagement.Domain.DomBranchModule.BranchEntities;
@@ -35,7 +34,7 @@ builder.Services.AddControllersWithViews()
     });
 
 // DbContext
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<MemberDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Repository
@@ -46,7 +45,6 @@ builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
 // Business Logic
 builder.Services.AddScoped<MemberManager>();
 builder.Services.AddScoped<BranchManager>();
-builder.Services.AddScoped<MembershipManager>();
 
 // FluentValidation
 builder.Services.AddScoped<IValidator<Member>, MemberValidation>();
@@ -80,3 +78,4 @@ app.MapControllerRoute(
     pattern: "{controller=Member}/{action=Index}/{id?}");
 
 app.Run();
+

@@ -38,11 +38,19 @@
 
     @* ACTION BUTTONS *@
     <div class="mb-3 d-flex gap-2">
+        <!-- Create New Member -->
         <a asp-controller="Member" asp-action="Create" class="btn btn-success btn-sm shadow-sm">
             <i class="bi bi-person-plus-fill"></i> Create New Member
         </a>
+
+        <!-- Branches -->
         <a asp-controller="Branch" asp-action="Index" class="btn btn-primary btn-sm shadow-sm">
             <i class="bi bi-building-gear"></i> Branches
+        </a>
+
+        <!-- Add Membership -->
+        <a asp-controller="Membership" asp-action="Index" class="btn btn-primary btn-sm shadow-sm">
+            <i class="bi bi-plus-circle"></i> Membership
         </a>
     </div>
 
@@ -96,6 +104,7 @@
                     <th>Birth Date</th>
                     <th>Address</th>
                     <th>Branch</th>
+                    <th>Membership</th>
                     <th>Contact</th>
                     <th>Email</th>
                     <th class="text-center">Actions</th>
@@ -122,6 +131,7 @@
                             <td>@(m.BirthDate?.ToString("MM-dd-yyyy") ?? "")</td>
                             <td>@m.Address</td>
                             <td>@m.Branch</td>
+                            <td>@m.Membership</td>
                             <td>@m.ContactNo</td>
                             <td>@m.Email</td>
                             <td class="text-center">
