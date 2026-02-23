@@ -226,8 +226,7 @@ namespace MembersManagement.Web.Controllers
 
         private void PopulateMemberships()
         {
-            ViewBag.Memberships = _membershipService
-                .GetAllMemberships()
+            ViewBag.Memberships = _membershipService.GetAllMemberships()
                 .Where(m => m.IsActive)
                 .OrderBy(m => m.MembershipName)
                 .Select(m => new SelectListItem

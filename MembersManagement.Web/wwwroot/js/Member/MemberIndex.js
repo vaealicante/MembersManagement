@@ -1,72 +1,34 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
 
-    /* =========================
-       DELETE MODAL LOGIC
-    ========================== */
-    const deleteButtons = document.querySelectorAll(".delete-button");
-    const modalBodyText = document.getElementById("modal-body-text");
-    const memberIdInput = document.getElementById("memberIdInput");
-    const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+    console.log("MemberIndex.js loaded");
+
     const deleteForm = document.getElementById("deleteForm");
-    const deleteModalEl = document.getElementById("deleteModal");
+    const memberIdInput = document.getElementById("memberIdInput");
+    const modalBodyText = document.getElementById("modal-body-text");
+    const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
 
-    // Initialize Bootstrap modal instance
-    const deleteModal = deleteModalEl ? new bootstrap.Modal(deleteModalEl, { backdrop: 'static', keyboard: false }) : null;
+    if (!deleteForm || !confirmDeleteBtn) {
+        console.error("Delete modal elements not found");
+        return;
+    }
 
-    // When a table delete button is clicked
-    deleteButtons.forEach(btn => {
-        btn.addEventListener("click", function () {
+    document.querySelectorAll(".delete-button").forEach(button => {
+        button.addEventListener("click", function () {
+
             const memberId = this.dataset.memberId;
             const memberName = this.dataset.memberName;
 
-            // Fill modal
-            memberIdInput.value = memberId;
-            modalBodyText.textContent = `Are you sure you want to delete "${memberName}"?`;
+            console.log("Delete clicked:", memberId, memberName);
 
-            // Show modal
-            if (deleteModal) deleteModal.show();
+            memberIdInput.value = memberId;
+            modalBodyText.innerHTML =
+                `Are you sure you want to delete <strong>${memberName}</strong>?<br>
+                <small class="text-muted">This action cannot be undone.</small>`;
         });
     });
 
-    // Confirm delete button inside modal
-    if (confirmDeleteBtn && deleteForm) {
-        confirmDeleteBtn.addEventListener("click", function () {
-            if (!memberIdInput.value) {
-                console.error("Member ID is empty. Delete aborted.");
-                return;
-            }
-
-            // Hide modal first to prevent blocking form submit
-            if (deleteModal) deleteModal.hide();
-
-            // Wait 200ms for modal to hide then submit
-            setTimeout(() => {
-                deleteForm.submit();
-            }, 200);
-        });
-    }
-
-    /* =========================
-       AUTO-HIDE SUCCESS ALERT
-    ========================== */
-    const successAlert = document.getElementById("success-alert");
-    if (successAlert) {
-        setTimeout(() => {
-            successAlert.remove();
-        }, 5000);
-    }
-
-    /* =========================
-       PAGE SIZE HANDLING
-    ========================== */
-    const pageSizeSelector = document.getElementById("pageSizeSelector");
-    const filterForm = document.getElementById("filterForm");
-
-    if (pageSizeSelector && filterForm) {
-        const params = new URLSearchParams(window.location.search);
-        const pageSize = params.get("pageSize");
-        if (pageSize !== null) pageSizeSelector.value = pageSize;
-
-        pageSizeSelector.addEventListener("change", () => filterForm.submit());
-    }
+    confirmDeleteBtn.addEventListener("click", function () {
+        console.log("Confirm delete clicked");
+        deleteForm.submit();
+    });
 });
