@@ -5,14 +5,17 @@ using MembersManagement.Domain.DomMembershipModule.MembershipEntities;
 
 namespace MembersManagement.Infrastructure.AppDbContext
 {
-    public class ApplicationDbContext : DbContext
+    public class MemberDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options) { }
-
+        public DbSet<Membership> Memberships { get; set; }
         public DbSet<Member> Members { get; set; }
         public DbSet<Branch> Branches { get; set; }
-        public DbSet<Membership> Memberships { get; set; }
+
+        // ✅ Constructor properly closed
+        public MemberDbContext(DbContextOptions<MemberDbContext> options)
+            : base(options)
+        {
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,7 +25,6 @@ namespace MembersManagement.Infrastructure.AppDbContext
             modelBuilder.Entity<Branch>(entity =>
             {
                 entity.HasKey(b => b.BranchId);
-
                 entity.Property(b => b.BranchName)
                       .IsRequired()
                       .HasMaxLength(100);
@@ -44,6 +46,11 @@ namespace MembersManagement.Infrastructure.AppDbContext
                       .WithMany()               // no navigation collection on Branch
                       .HasForeignKey(m => m.BranchId)
                       .OnDelete(DeleteBehavior.Restrict); // ✅ safer than SetNull
+
+                entity.HasOne(m => m.Membership)
+                      .WithMany() // Or .WithMany(ms => ms.Members) if you add a collection to Membership
+                      .HasForeignKey(m => m.MembershipId)
+                      .OnDelete(DeleteBehavior.Restrict); // Prevents deleting a membership that has active members
             });
 
             modelBuilder.Entity<Membership>(entity =>

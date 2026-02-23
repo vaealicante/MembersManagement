@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿                                                       using Microsoft.AspNetCore.Mvc;
 using MembersManagement.Infrastructure.AppDbContext;
 using MembersManagement.Domain.DomBranchModule.BranchEntities;
 using MembersManagement.Web.ViewModels;
@@ -7,9 +7,9 @@ namespace MembersManagement.Web.Controllers
 {
     public class BranchController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly MemberDbContext _context;
 
-        public BranchController(ApplicationDbContext context)
+        public BranchController(MemberDbContext context)
         {
             _context = context;
         }

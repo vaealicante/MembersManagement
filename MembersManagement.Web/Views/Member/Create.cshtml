@@ -12,7 +12,6 @@
     <div class="card-body p-4">
         <form asp-controller="Member" asp-action="Create" method="post" novalidate>
             @Html.AntiForgeryToken()
-
             <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
             <div class="row g-3">
@@ -34,14 +33,21 @@
                     <span asp-validation-for="BirthDate" class="text-danger small"></span>
                 </div>
 
-               <div class="mb-4">
-    <label asp-for="BranchId" class="form-label small fw-bold text-muted">ASSIGN BRANCH</label>
-   <select asp-for="BranchId" class="form-select" 
-        asp-items="@(new SelectList(ViewBag.Branches ?? new List<Branch>(), "BranchId", "BranchName"))">
-    <option value="">-- Select Branch --</option>
-</select>
-    <span asp-validation-for="BranchId" class="text-danger small"></span>
-</div>
+                <div class="col-md-6 mb-4">
+                    <label asp-for="BranchId" class="form-label small fw-bold text-muted">ASSIGN BRANCH</label>
+                    <select asp-for="BranchId" class="form-select" asp-items="ViewBag.BranchesList">
+                        <option value="">-- Select Branch --</option>
+                    </select>
+                    <span asp-validation-for="BranchId" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <label asp-for="MembershipId" class="form-label fw-bold">Membership</label>
+                    <select asp-for="MembershipId" class="form-select" asp-items="ViewBag.Memberships">
+                        <option value="">-- Select Membership --</option>
+                    </select>
+                    <span asp-validation-for="MembershipId" class="text-danger"></span>
+                </div>
 
                 <div class="col-md-6">
                     <label asp-for="ContactNo" class="form-label small fw-bold text-uppercase text-muted"></label>

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MembersManagement.Infrastructure.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(MemberDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -87,11 +87,39 @@ namespace MembersManagement.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("MembershipId")
+                        .HasColumnType("int");
+
                     b.HasKey("MemberID");
 
                     b.HasIndex("BranchId");
 
+                    b.HasIndex("MembershipId");
+
                     b.ToTable("Members");
+                });
+
+            modelBuilder.Entity("MembersManagement.Domain.DomMembershipModule.MembershipEntities.Membership", b =>
+                {
+                    b.Property<int>("MembershipId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MembershipId"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MembershipName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("MembershipId");
+
+                    b.ToTable("Memberships");
                 });
 
             modelBuilder.Entity("MembersManagement.Domain.DomMemberModule.Entities.Member", b =>
@@ -99,9 +127,17 @@ namespace MembersManagement.Infrastructure.Migrations
                     b.HasOne("MembersManagement.Domain.DomBranchModule.BranchEntities.Branch", "Branch")
                         .WithMany()
                         .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("MembersManagement.Domain.DomMembershipModule.MembershipEntities.Membership", "Membership")
+                        .WithMany()
+                        .HasForeignKey("MembershipId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Branch");
+
+                    b.Navigation("Membership");
                 });
 #pragma warning restore 612, 618
         }

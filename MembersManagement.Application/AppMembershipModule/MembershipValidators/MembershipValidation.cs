@@ -8,13 +8,11 @@ namespace MembersManagement.Application.AppMembershipModule.MembershipValidators
     {
         public MembershipValidation()
         {
-            // -------------------------------------------------
-            // REQUIRED FIELDS
-            // -------------------------------------------------
-
-            RuleFor(m => m.MembershipName)
-                .NotEmpty()
-                .WithMessage("Membership name is required.");
+            RuleFor(x => x.MembershipName)
+            .NotEmpty()
+            .WithMessage("Membership Name is required.")
+            .MaximumLength(100)
+            .WithMessage("Membership Name must not exceed 100 characters.");
 
         }
     }
