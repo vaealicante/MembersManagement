@@ -58,7 +58,7 @@ namespace MembersManagement.Infrastructure.InfraMemberModule.RepositoryImplement
 
         public void SaveChanges()
         {
-            throw new NotImplementedException();
+            _context.SaveChanges();
         }
     }
 }

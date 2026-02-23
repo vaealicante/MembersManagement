@@ -38,8 +38,9 @@
                 <!-- Branch Dropdown -->
                 <div class="col-md-6">
                     <label asp-for="BranchId" class="form-label small fw-bold text-muted">Assign Branch</label>
-                    <select asp-for="BranchId" class="form-select"
-                            asp-items="@(new SelectList(ViewBag.Branches ?? new List<MembersManagement.Domain.DomBranchModule.BranchEntities.Branch>(), "BranchId", "BranchName", Model.BranchId))">
+                    <select asp-for="BranchId"
+                            class="form-select"
+                            asp-items="ViewBag.BranchesList">
                         <option value="">-- Select Branch --</option>
                     </select>
                     <span asp-validation-for="BranchId" class="text-danger small"></span>
@@ -48,8 +49,9 @@
                 <!-- Membership Dropdown -->
                 <div class="col-md-6">
                     <label asp-for="MembershipId" class="form-label small fw-bold text-muted">Membership</label>
-                    <select asp-for="MembershipId" class="form-select"
-                            asp-items="@(new SelectList(ViewBag.Memberships ?? new List<MembersManagement.Domain.DomMembershipModule.MembershipEntities.Membership>(), "MembershipId", "MembershipName", Model.MembershipId))">
+                    <select asp-for="MembershipId"
+                            class="form-select"
+                            asp-items="ViewBag.Memberships">
                         <option value="">-- Select Membership --</option>
                     </select>
                     <span asp-validation-for="MembershipId" class="text-danger small"></span>
