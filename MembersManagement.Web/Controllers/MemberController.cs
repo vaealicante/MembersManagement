@@ -200,6 +200,33 @@ namespace MembersManagement.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: Member/Details/5
+        public IActionResult Details(int id)
+        {
+            var member = _memberService.GetById(id); // Make sure this returns a Member
+            if (member == null)
+                return NotFound();
+
+            var model = new MemberViewModel
+            {
+                MemberID = member.MemberID,
+                FirstName = member.FirstName,
+                LastName = member.LastName,
+                BirthDate = member.BirthDate.HasValue ? member.BirthDate.Value.ToDateTime(new TimeOnly()) : (DateTime?)null,
+                Address = member.Address,
+                BranchId = member.BranchId,
+                Branch = member.Branch?.BranchName,
+                MembershipId = member.MembershipId,
+                Membership = member.Membership?.MembershipName,
+                ContactNo = member.ContactNo,
+                Email = member.Email,
+                IsActive = member.IsActive,
+                CreatedDate = member.DateCreated
+            };
+
+            return View(model);
+        }
+
         // ================= DELETE =================
         [HttpPost]
         [ValidateAntiForgeryToken]
