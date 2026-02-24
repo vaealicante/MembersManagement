@@ -20,3 +20,39 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.btn-icon {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-branch {
+    background-color: #B57EDC;
+    border-color: #A36ACD;
+    color: white;
+}
+
+.btn-branch:hover {
+    background-color: #7A49A5; /* Deep Royal Lavender */
+    border-color: #6A3E91;
+    color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Slightly deeper shadow on hover */
+}
+/* Custom Membership Button */
+.btn-membership {
+    background-color: #FFC067;
+    border-color: #FFC067;
+    color: #ffffff;
+    transition: all 0.2s ease-in-out;
+}
+
+    /* Darker, Richer Orange for Hover */
+.btn-membership:hover {
+    background-color: #E67E00; /* Burnt Orange */
+    border-color: #CC7000;
+    color: #ffffff;
+    transform: translateY(-1px); /* Slight lift effect */
+}
