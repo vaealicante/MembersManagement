@@ -4,26 +4,49 @@
     ViewData["Title"] = "Edit Membership";
 }
 
-<h2>Edit Membership</h2>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>Edit Membership
+                    </h5>
+                </div>
 
-<form asp-action="Edit" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="MembershipId" />
+                <form asp-action="Edit" method="post" class="p-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="MembershipId" />
 
-    <div class="mb-3">
-        <label asp-for="MembershipName" class="form-label"></label>
-        <input asp-for="MembershipName" class="form-control" />
-        <span asp-validation-for="MembershipName" class="text-danger"></span>
+                    <!-- Membership Name -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted">Membership Name</label>
+                        <input asp-for="MembershipName" class="form-control border-start-0" />
+                        <span asp-validation-for="MembershipName" class="text-danger"></span>
+                    </div>
+
+                    <!-- Active Toggle -->
+                    <div class="form-check form-switch mb-4">
+                        <input asp-for="IsActive" class="form-check-input" />
+                        <label asp-for="IsActive" class="form-check-label">Membership Status (Active)</label>
+                    </div>
+
+                    <hr class="my-4 text-muted">
+
+                    <!-- Buttons -->
+                    <div class="d-flex gap-3">
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-warning px-4 shadow-sm fw-bold">
+                            <i class="bi bi-check2-circle me-2"></i> Update Membership
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-
-    <div class="form-check mb-3">
-        <input asp-for="IsActive" class="form-check-input" />
-        <label asp-for="IsActive" class="form-check-label">Active</label>
-    </div>
-
-    <button type="submit" class="btn btn-warning">Update</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
