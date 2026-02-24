@@ -8,6 +8,7 @@ namespace MembersManagement.Application.AppMemberModule.ApplicationInterface
     {
         // Active members only (used by Index page)
         IEnumerable<Member> GetMembers();
+        Member? GetById(int id);
 
         // Dashboard data (can include inactive if needed)
         IEnumerable<Member> GetDashboardData();

@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-
-using MembersManagement.Application.AppMemberModule.ApplicationInterface;
-
-using MembersManagement.Application.AppMemberModule.BusinessLogic;
-
+﻿using MembersManagement.Application.AppMemberModule.ApplicationInterface;
 using MembersManagement.Domain.DomMemberModule.Entities;
+using MembersManagement.Domain.DomMemberModule.Interfaces;
+using MembersManagement.Application.AppMemberModule.BusinessLogic;
+using System.Collections.Generic;
 
 
 namespace MembersManagement.Application.AppMemberModule.Services
@@ -31,6 +29,10 @@ namespace MembersManagement.Application.AppMemberModule.Services
             return _memberManager.GetAllMembersRaw();
         }
         public Member? GetMember(int id)
+        {
+            return _memberManager.GetMemberById(id);
+        }
+        public Member? GetById(int id)
         {
             return _memberManager.GetMemberById(id);
         }
