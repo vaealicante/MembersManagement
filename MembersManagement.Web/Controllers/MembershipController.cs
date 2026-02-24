@@ -47,7 +47,7 @@ namespace MembersManagement.Web.Controllers
             var membership = new Membership
             {
                 MembershipName = model.MembershipName,
-                IsActive = model.IsActive,
+                IsActive = true,
                 DateCreated = DateTime.UtcNow
             };
 
