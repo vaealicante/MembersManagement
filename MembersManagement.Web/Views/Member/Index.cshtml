@@ -34,23 +34,29 @@
                 </div>
             </div>
         </div>
+        <script>
+            setTimeout(() => {
+                const alert = document.getElementById('successAlert');
+                if (alert) bootstrap.Alert.getOrCreateInstance(alert).close();
+            }, 5000);
+        </script>
     }
 
     @* ACTION BUTTONS *@
     <div class="mb-3 d-flex gap-2">
         <!-- Create New Member -->
         <a asp-controller="Member" asp-action="Create" class="btn btn-success btn-sm shadow-sm">
-            <i class="bi bi-person-plus-fill"></i> Create New Member
+            <i class="bi bi-person-plus"></i> Create New Member
         </a>
 
         <!-- Branches -->
-        <a asp-controller="Branch" asp-action="Index" class="btn btn-primary btn-sm shadow-sm">
-            <i class="bi bi-building-gear"></i> Branches
+        <a asp-controller="Branch" asp-action="Index" class="btn btn-branch btn-sm shadow-sm">
+            <i class="bi bi-building"></i> Branches
         </a>
 
         <!-- Add Membership -->
-        <a asp-controller="Membership" asp-action="Index" class="btn btn-primary btn-sm shadow-sm">
-            <i class="bi bi-plus-circle"></i> Membership
+        <a asp-controller="Membership" asp-action="Index" class="btn btn-membership btn-sm shadow-sm">
+            <i class="bi bi-star me-1"></i> Membership
         </a>
     </div>
 

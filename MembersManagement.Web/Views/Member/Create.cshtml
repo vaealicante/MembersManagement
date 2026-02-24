@@ -42,7 +42,7 @@
                 </div>
 
                 <div class="col-md-6 mb-4">
-                    <label asp-for="MembershipId" class="form-label fw-bold">Membership</label>
+                    <label asp-for="MembershipId" class="form-label small fw-bold text-muted">MEMBERSHIP</label>
                     <select asp-for="MembershipId" class="form-select" asp-items="ViewBag.Memberships">
                         <option value="">-- Select Membership --</option>
                     </select>
@@ -67,18 +67,21 @@
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
 
-                <div class="col-12">
-                    <label asp-for="Address" class="form-label small fw-bold text-uppercase text-muted"></label>
-                    <textarea asp-for="Address" class="form-control" rows="2" placeholder="Enter Complete Address"></textarea>
-                    <span asp-validation-for="Address" class="text-danger small"></span>
+                <div class="col-md-6">
+                         <label asp-for="Address" class="form-label small fw-bold text-uppercase text-muted"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-geo-alt"></i></span>
+                         <textarea asp-for="Address" class="form-control" rows="2" placeholder="Enter Complete Address"></textarea>
+                    </div>
+                        <span asp-validation-for="Address" class="text-danger small"></span>
                 </div>
             </div>
 
             <hr class="my-4 text-muted">
 
-            <div class="d-flex justify-content-end gap-2">
+            <div class="d-flex gap-2">
                 <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
-                <button type="submit" class="btn btn-primary px-3 shadow-sm">
+                <button type="submit" class="btn btn-success px-4 shadow-sm">
                     <i class="bi bi-save me-2"></i>Save Member
                 </button>
             </div>
