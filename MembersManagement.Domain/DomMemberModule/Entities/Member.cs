@@ -8,8 +8,8 @@ namespace MembersManagement.Domain.DomMemberModule.Entities
     {
         public int MemberID { get; set; }
 
-        public int MembershipId { get; set; }
-        public Membership Membership { get; set; } = null!;
+        public int? MembershipId { get; set; }
+        public Membership? Membership { get; set; }
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public DateOnly? BirthDate { get; set; }
