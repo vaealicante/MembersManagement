@@ -27,14 +27,13 @@
     var alert = document.getElementById('successAlert');
     if (alert) {
         setTimeout(function () {
-            // Smooth fade-out
             alert.classList.add('fade');
             alert.classList.add('show'); // Required by Bootstrap
             alert.style.transition = 'opacity 0.5s ease-out';
             alert.style.opacity = '0';
             setTimeout(function () {
                 alert.remove();
-            }, 500); // Remove after fade
-        }, 3000); // 3 seconds
+            }, 500);
+        }, 3000);
     }
 });
