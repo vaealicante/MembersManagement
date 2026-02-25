@@ -47,18 +47,14 @@ namespace MembersManagement.Infrastructure.AppDbContext
                       .HasForeignKey(m => m.BranchId)
                       .OnDelete(DeleteBehavior.Restrict); // ✅ safer than SetNull
 
+                entity.Property(m => m.MembershipId)
+                      .IsRequired(false); // 🔹 THIS IS IMPORTANT
+
                 entity.HasOne(m => m.Membership)
-                      .WithMany() // Or .WithMany(ms => ms.Members) if you add a collection to Membership
+                      .WithMany()
                       .HasForeignKey(m => m.MembershipId)
-                      .OnDelete(DeleteBehavior.Restrict); // Prevents deleting a membership that has active members
-            });
-
-            modelBuilder.Entity<Membership>(entity =>
-            {
-                entity.HasKey(s => s.MembershipId);
-
-                entity.Property(s => s.MembershipName)
-                .IsRequired();
+                      .IsRequired(false) // 🔹 Explicit optional relationship
+                      .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

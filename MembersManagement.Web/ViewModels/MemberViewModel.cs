@@ -23,8 +23,8 @@ namespace MembersManagement.Web.ViewModels
             }
         }
 
-        public int MembershipId { get; set; }
-        public string Membership { get; set; } = string.Empty;
+        public int? MembershipId { get; set; }
+        public string? Membership { get; set; } = string.Empty;
 
         public string? Address { get; set; } = string.Empty;
         public int? BranchId { get; set; }
