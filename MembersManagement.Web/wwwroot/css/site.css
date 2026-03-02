@@ -104,3 +104,11 @@ body {
         gap: 4px;
     }
 }
+#success-alert {
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+
+    #success-alert.fade {
+        opacity: 0;
+    }

@@ -19,10 +19,9 @@ public class MemberViewModelValidator : AbstractValidator<MemberViewModel>
             .Must(BeWithinMaxAgeRange)
             .WithMessage("Member cannot be older than 65 years, 6 months, and 1 day.");
 
-        RuleFor(m => m.Branch)
-            .NotEmpty()
-            .When(m => !m.BranchId.HasValue) // Only require the string if ID is missing
-            .WithMessage("Please select a branch.");
+        RuleFor(m => m.ContactNo)
+                .Matches(@"^(09|\+639)\d{9}$")
+                .WithMessage("Contact number must be valid.");
 
         RuleFor(m => m.Email)
             .EmailAddress()

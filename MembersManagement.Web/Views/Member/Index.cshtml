@@ -34,12 +34,6 @@
                 </div>
             </div>
         </div>
-        <script>
-            setTimeout(() => {
-                const alert = document.getElementById('successAlert');
-                if (alert) bootstrap.Alert.getOrCreateInstance(alert).close();
-            }, 5000);
-        </script>
     }
 
     @* ACTION BUTTONS *@
@@ -65,34 +59,48 @@
         <div class="card-body">
             <form id="filterForm" method="get">
                 <input type="hidden" name="page" value="1" />
-                <input type="hidden" name="pageSize" value="@pageSize" />
 
                 <div class="d-flex flex-wrap gap-3 align-items-end">
                     <div style="flex:2; min-width:250px;">
                         <label class="small text-muted fw-bold">SEARCH</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                            <input name="search" class="form-control" placeholder="Search Last Name..." value="@searchTerm" />
+                            <span class="input-group-text bg-light">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input name="search"
+                                   class="form-control"
+                                   placeholder="Search Last Name..."
+                                   value="@searchTerm" />
                         </div>
                     </div>
 
                     <div style="flex:1; min-width:200px;">
                         <label class="small text-muted fw-bold">BRANCH</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-geo-alt"></i></span>
-                            <input name="branch" list="branchOptions" class="form-control" placeholder="Filter Branch..." value="@currentBranch" />
+                            <span class="input-group-text bg-light">
+                                <i class="bi bi-geo-alt"></i>
+                            </span>
+                            <input name="branch"
+                                   list="branchOptions"
+                                   class="form-control"
+                                   placeholder="Filter Branch..."
+                                   value="@currentBranch" />
                             <datalist id="branchOptions">
                                 @foreach (var b in branches)
                                 {
                                     <option value="@b"></option>
                                 }
                             </datalist>
-                            <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-funnel"></i></button>
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="bi bi-funnel"></i>
+                            </button>
                         </div>
                     </div>
 
                     <div>
-                        <a asp-action="Index" class="btn btn-outline-secondary px-4">Reset</a>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                            Reset
+                        </a>
                     </div>
                 </div>
             </form>
@@ -200,14 +208,13 @@
                     form="filterForm"
                     class="form-select form-select-sm"
                     style="width: 80px;"
-                    value="@pageSize">
+                    onchange="this.form.submit()">
 
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="15">15</option>
-                <option value="20">20</option>
-                <option value="0">All</option>
-
+                <option value="5" selected="@(pageSize == 5)">5</option>
+                <option value="10" selected="@(pageSize == 10)">10</option>
+                <option value="15" selected="@(pageSize == 15)">15</option>
+                <option value="20" selected="@(pageSize == 20)">20</option>
+                <option value="0" selected="@(pageSize == 0)">All</option>
             </select>
         </div>
     </div>
