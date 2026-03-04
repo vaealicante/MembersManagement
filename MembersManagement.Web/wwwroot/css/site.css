@@ -112,3 +112,31 @@ body {
     #success-alert.fade {
         opacity: 0;
     }
+
+.search-box .form-control {
+    height: 40px;
+    font-size: 0.92rem;
+    width: 400px;
+}
+
+.search-box .input-group-text {
+    border-radius: 6px 0 0 6px;
+}
+
+.search-box .form-control {
+    border-radius: 0 6px 6px 0;
+}
+
+    .search-box .form-control:focus {
+        box-shadow: none;
+        border-color: #ced4da;
+    }
+.search-wrapper {
+    max-width: 520px; /* ?? increase length here */
+}
+
+@media (max-width: 768px) {
+    .search-wrapper {
+        max-width: 100%; /* full width on mobile */
+    }
+}

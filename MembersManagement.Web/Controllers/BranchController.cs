@@ -1,4 +1,4 @@
-﻿                                                       using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MembersManagement.Infrastructure.AppDbContext;
 using MembersManagement.Domain.DomBranchModule.BranchEntities;
 using MembersManagement.Web.ViewModels;
@@ -14,32 +14,47 @@ namespace MembersManagement.Web.Controllers
             _context = context;
         }
 
+        // =========================
         // GET: Branch/Index
-        public IActionResult Index()
+        // =========================
+        public IActionResult Index(string search)
         {
-            var branches = _context.Branches
-                                   .Where(b => b.IsActive) // Only show active branches
-                                   .Select(b => new BranchViewModel
-                                   {
-                                       BranchId = b.BranchId,
-                                       BranchName = b.BranchName,
-                                       Location = b.Location,
-                                       IsActive = b.IsActive,
-                                       DateCreated = b.DateCreated
-                                   })
-                                   .ToList();
+            var query = _context.Branches
+                                .Where(b => b.IsActive);
+
+            // 🔍 SEARCH (server-side filtering only)
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(b =>
+                    b.BranchName.Contains(search) ||
+                    (b.Location != null && b.Location.Contains(search)));
+            }
+
+            var branches = query
+                .Select(b => new BranchViewModel
+                {
+                    BranchId = b.BranchId,
+                    BranchName = b.BranchName,
+                    Location = b.Location,
+                    IsActive = b.IsActive,
+                    DateCreated = b.DateCreated
+                })
+                .ToList();
 
             return View("BranchIndex", branches);
         }
 
-
+        // =========================
         // GET: Branch/CreateBranch
+        // =========================
         public IActionResult CreateBranch()
         {
             return View("BranchCreate");
         }
 
+        // =========================
         // POST: Branch/CreateBranch
+        // =========================
         [HttpPost]
         public IActionResult CreateBranch(BranchViewModel model)
         {
@@ -57,14 +72,22 @@ namespace MembersManagement.Web.Controllers
             _context.Branches.Add(branch);
             _context.SaveChanges();
 
+            TempData["SuccessMessage"] =
+                $"Branch '{branch.BranchName}' created successfully.";
+
             return RedirectToAction("Index");
         }
 
-        // GET: Branch/Edit/5
+        // =========================
+        // GET: Branch/Edit
+        // =========================
         public IActionResult Edit(int id)
         {
-            var branch = _context.Branches.FirstOrDefault(b => b.BranchId == id);
-            if (branch == null) return NotFound();
+            var branch = _context.Branches
+                                 .FirstOrDefault(b => b.BranchId == id);
+
+            if (branch == null)
+                return NotFound();
 
             var model = new BranchViewModel
             {
@@ -77,15 +100,20 @@ namespace MembersManagement.Web.Controllers
             return View("BranchEdit", model);
         }
 
-        // POST: Branch/Edit/5
+        // =========================
+        // POST: Branch/Edit
+        // =========================
         [HttpPost]
         public IActionResult Edit(BranchViewModel model)
         {
             if (!ModelState.IsValid)
                 return View("BranchEdit", model);
 
-            var branch = _context.Branches.FirstOrDefault(b => b.BranchId == model.BranchId);
-            if (branch == null) return NotFound();
+            var branch = _context.Branches
+                                 .FirstOrDefault(b => b.BranchId == model.BranchId);
+
+            if (branch == null)
+                return NotFound();
 
             branch.BranchName = model.BranchName;
             branch.Location = model.Location;
@@ -93,11 +121,17 @@ namespace MembersManagement.Web.Controllers
 
             _context.SaveChanges();
 
+            TempData["SuccessMessage"] =
+                $"Branch '{branch.BranchName}' updated successfully.";
+
             return RedirectToAction("Index");
         }
 
-        // POST: Branch/SoftDelete/5
+        // =========================
+        // POST: Branch/SoftDelete
+        // =========================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult SoftDelete(int id)
         {
             var branch = _context.Branches.FirstOrDefault(b => b.BranchId == id);
@@ -111,6 +145,5 @@ namespace MembersManagement.Web.Controllers
 
             return RedirectToAction("Index");
         }
-
     }
 }
