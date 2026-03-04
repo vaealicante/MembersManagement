@@ -104,7 +104,7 @@ namespace MembersManagement.Web.Controllers
             if (membership == null) return NotFound();
 
             _membershipService.DeleteMembership(id);
-            TempData["SuccessMessage"] = "Membership deleted successfully!";
+            TempData["SuccessMessage"] = "Membership Deleted Successfully!";
             return RedirectToAction(nameof(Index));
         }
     }
