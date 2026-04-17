@@ -99,7 +99,7 @@
                                             <div class="fw-bold">@m.FirstName @m.LastName</div>
                                             <div class="text-muted" style="font-size: 0.75rem;">ID: #@m.MemberID</div>
                                         </td>
-                                        <td><span class="badge bg-info-subtle text-info">@m.Branch</span></td>
+                                        <td><span class="badge bg-info-subtle text-info">@(m.Branch?.BranchName ?? "No Branch")</span></td>
                                         <td class="text-end pe-3">
                                             <a asp-controller="Member" asp-action="Details" asp-route-id="@m.MemberID"
                                                class="btn btn-sm btn-outline-info shadow-sm">

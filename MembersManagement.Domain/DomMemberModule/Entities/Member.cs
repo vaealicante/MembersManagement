@@ -24,5 +24,6 @@ namespace MembersManagement.Domain.DomMemberModule.Entities
         public string? Email { get; set; }
         public bool IsActive { get; set; }
         public DateTime DateCreated { get; set; }
+       
     }
 }

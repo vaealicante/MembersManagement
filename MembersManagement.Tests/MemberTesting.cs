@@ -1,45 +1,115 @@
-using Xunit;
-using Moq;
 using FluentValidation;
+using MembersManagement.Application.AppMemberModule.BusinessLogic;
+using MembersManagement.Application.AppMemberModule.Validators;
+using MembersManagement.Domain.DomBranchModule.BranchEntities;
+using MembersManagement.Domain.DomMemberModule.Entities;
+using MembersManagement.Domain.DomMemberModule.Interfaces;
+using MembersManagement.Domain.DomMembershipModule.MembershipEntities;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MembersManagement.Application.AppMemberModule.BusinessLogic;
-using MembersManagement.Application.AppMemberModule.Validators;
-using MembersManagement.Domain.DomMemberModule.Entities;
-using MembersManagement.Domain.DomMemberModule.Interfaces;
+using Xunit;
 
 namespace MemberManagement.Tests
 {
     public class MemberManagerTests
     {
         private readonly Mock<IMemberRepository> _mockRepo;
-        private readonly MemberValidation _realValidator;
+        private readonly MemberValidation _validator;
         private readonly MemberManager _memberManager;
+        private readonly Random _random = new Random();
+
+        // Realistic first and last names
+        private readonly string[] _firstNames = { "Alice", "Bob", "Charlie", "Diana", "Ethan", "Fiona", "George", "Hannah", "Ian", "Julia", "Kevin", "Laura" };
+        private readonly string[] _lastNames = { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Wilson" };
+
+        // Realistic branch locations
+        private readonly string[] _locations = { "New York", "Los Angeles", "Chicago", "Houston", "Miami", "Dallas", "Atlanta", "Seattle", "Denver", "Boston" };
 
         public MemberManagerTests()
         {
-            // Initialize the mocked repository and real validator
             _mockRepo = new Mock<IMemberRepository>();
-            _realValidator = new MemberValidation();
-            // Inject dependencies into MemberManager
-            _memberManager = new MemberManager(_mockRepo.Object, _realValidator);
+            _validator = new MemberValidation();
+            _memberManager = new MemberManager(_mockRepo.Object, _validator);
         }
 
-        // ---------------- CREATE ----------------
+        // =========================
+        // HELPER METHODS
+        // =========================
+
+        private string GetRandomFirstName() => _firstNames[_random.Next(_firstNames.Length)];
+        private string GetRandomLastName() => _lastNames[_random.Next(_lastNames.Length)];
+        private string GetRandomLocation() => _locations[_random.Next(_locations.Length)];
+
+        private Member CreateTestMember(
+            int id = 0,
+            string? firstName = null,
+            string? lastName = null,
+            bool isActive = true,
+            Branch? branch = null,
+            Membership? membership = null)
+        {
+            return new Member
+            {
+                MemberID = id,
+                FirstName = firstName ?? GetRandomFirstName(),
+                LastName = lastName ?? GetRandomLastName(),
+                IsActive = isActive,
+                Branch = branch,
+                Membership = membership
+            };
+        }
+
+        private Branch CreateUniqueBranch(int id)
+        {
+            return new Branch
+            {
+                BranchId = id,
+                BranchName = $"Branch_{Guid.NewGuid():N}",
+                Location = GetRandomLocation(),
+                IsActive = true,
+                DateCreated = DateTime.UtcNow
+            };
+        }
+
+        private Membership CreateUniqueMembership(int id)
+        {
+            return new Membership
+            {
+                MembershipId = id,
+                MembershipName = $"Membership_{Guid.NewGuid():N}",
+                IsActive = true,
+                DateCreated = DateTime.UtcNow
+            };
+        }
+
+        private List<Member> GenerateUniqueMembers(int count = 200, bool allowNulls = true)
+        {
+            var members = new List<Member>();
+            for (int i = 1; i <= count; i++)
+            {
+                Branch? branch = allowNulls && i % 5 == 0 ? null : CreateUniqueBranch(i);
+                Membership? membership = allowNulls && i % 7 == 0 ? null : CreateUniqueMembership(i);
+
+                members.Add(CreateTestMember(
+                    id: i,
+                    branch: branch,
+                    membership: membership,
+                    isActive: _random.Next(0, 2) == 1
+                ));
+            }
+            return members;
+        }
+
+        // =========================
+        // CREATE TESTS
+        // =========================
 
         [Fact]
         public void CreateMember_ShouldAssignMetadata_AndCallSave()
         {
-            // Test that creating a valid member:
-            // 1. Sets IsActive to true
-            // 2. Sets DateCreated to current time
-            // 3. Calls Add() and SaveChanges() on repository
-            var member = new Member
-            {
-                FirstName = "Alice",
-                LastName = "Smith"
-            };
+            var member = CreateTestMember(firstName: "Alice", lastName: "Smith");
 
             _memberManager.CreateMember(member);
 
@@ -52,30 +122,55 @@ namespace MemberManagement.Tests
         [Fact]
         public void CreateMember_ShouldThrow_WhenValidationFails()
         {
-            // Test that creating a member with invalid data
-            // (empty first name) throws ValidationException
-            // and does not call repository methods
-            var member = new Member { FirstName = "" };
+            var member = CreateTestMember(firstName: "", lastName: "");
 
-            Assert.Throws<ValidationException>(() =>
-                _memberManager.CreateMember(member));
+            Assert.Throws<ValidationException>(() => _memberManager.CreateMember(member));
 
             _mockRepo.Verify(r => r.Add(It.IsAny<Member>()), Times.Never);
             _mockRepo.Verify(r => r.SaveChanges(), Times.Never);
         }
 
-        // ---------------- READ ----------------
+        [Fact]
+        public void CreateMember_ShouldWorkWithUniqueBranchAndMembership()
+        {
+            var branch = CreateUniqueBranch(1);
+            var membership = CreateUniqueMembership(1);
+
+            var member = CreateTestMember(branch: branch, membership: membership);
+
+            _memberManager.CreateMember(member);
+
+            Assert.NotNull(member.Branch);
+            Assert.NotNull(member.Membership);
+            _mockRepo.Verify(r => r.Add(member), Times.Once);
+            _mockRepo.Verify(r => r.SaveChanges(), Times.Once);
+        }
+
+        [Fact]
+        public void Member_ShouldAllowNullMembershipAndBranch()
+        {
+            var member = CreateTestMember(branch: null, membership: null);
+
+            _memberManager.CreateMember(member);
+
+            Assert.Null(member.Branch);
+            Assert.Null(member.Membership);
+            _mockRepo.Verify(r => r.Add(member), Times.Once);
+            _mockRepo.Verify(r => r.SaveChanges(), Times.Once);
+        }
+
+        // =========================
+        // READ TESTS
+        // =========================
 
         [Fact]
         public void GetMembers_ShouldOnlyReturnActiveRecords()
         {
-            // Test that GetMembers() returns only active members
-            // from a mixed list (active and inactive)
             var members = new List<Member>
             {
-                new Member { MemberID = 1, IsActive = true },
-                new Member { MemberID = 2, IsActive = false },
-                new Member { MemberID = 3, IsActive = true }
+                CreateTestMember(id: 1, isActive: true),
+                CreateTestMember(id: 2, isActive: false),
+                CreateTestMember(id: 3, isActive: true)
             };
 
             _mockRepo.Setup(r => r.GetAll()).Returns(members);
@@ -86,25 +181,35 @@ namespace MemberManagement.Tests
             Assert.All(result, m => Assert.True(m.IsActive));
         }
 
-        // ---------------- UPDATE ----------------
+        [Fact]
+        public void GetMembers_ShouldHandle200UniqueMembers()
+        {
+            var members = GenerateUniqueMembers(200, allowNulls: false);
+            _mockRepo.Setup(r => r.GetAll()).Returns(members);
+
+            var result = _memberManager.GetMembers().ToList();
+
+            Assert.Equal(200, result.Count);
+            // Ensure uniqueness of Branch and Membership names
+            Assert.Equal(result.Where(m => m.Branch != null).Select(m => m.Branch!.BranchName).Distinct().Count(),
+                         result.Count(m => m.Branch != null));
+            Assert.Equal(result.Where(m => m.Membership != null).Select(m => m.Membership!.MembershipName).Distinct().Count(),
+                         result.Count(m => m.Membership != null));
+            // Check branch locations are valid
+            Assert.All(result.Where(m => m.Branch != null), m => Assert.Contains(m.Branch!.Location, _locations));
+        }
+
+        // =========================
+        // UPDATE TESTS
+        // =========================
 
         [Fact]
         public void UpdateMember_ShouldUpdateMember_AndSave()
         {
-            // Test that updating an existing member:
-            // 1. Applies changes to the member object
-            // 2. Calls Update() and SaveChanges() on repository
-            var existingMember = new Member
-            {
-                MemberID = 1,
-                FirstName = "Old",
-                LastName = "Name",
-                IsActive = true
-            };
-
+            var existingMember = CreateTestMember(id: 1);
             _mockRepo.Setup(r => r.GetById(1)).Returns(existingMember);
 
-            existingMember.FirstName = "New";
+            existingMember.FirstName = "Updated";
 
             _memberManager.UpdateMember(existingMember);
 
@@ -115,37 +220,22 @@ namespace MemberManagement.Tests
         [Fact]
         public void UpdateMember_ShouldThrow_WhenValidationFails()
         {
-            // Test that updating a member with invalid data
-            // (empty first and last name) throws ValidationException
-            // and does not call repository methods
-            var member = new Member
-            {
-                MemberID = 1,
-                FirstName = "",
-                LastName = ""
-            };
+            var member = CreateTestMember(id: 1, firstName: "", lastName: "");
 
-            Assert.Throws<ValidationException>(() =>
-                _memberManager.UpdateMember(member));
+            Assert.Throws<ValidationException>(() => _memberManager.UpdateMember(member));
 
             _mockRepo.Verify(r => r.Update(It.IsAny<Member>()), Times.Never);
             _mockRepo.Verify(r => r.SaveChanges(), Times.Never);
         }
 
-        // ---------------- DELETE ----------------
+        // =========================
+        // DELETE TESTS
+        // =========================
 
         [Fact]
         public void DeleteMember_ShouldSetIsActiveToFalse_WhenMemberExists()
         {
-            // Test that deleting an existing member:
-            // 1. Sets IsActive to false (soft delete)
-            // 2. Calls Update() and SaveChanges() on repository
-            var existingMember = new Member
-            {
-                MemberID = 1,
-                IsActive = true
-            };
-
+            var existingMember = CreateTestMember(id: 1);
             _mockRepo.Setup(r => r.GetById(1)).Returns(existingMember);
 
             _memberManager.DeleteMember(1);
@@ -158,13 +248,9 @@ namespace MemberManagement.Tests
         [Fact]
         public void DeleteMember_ShouldThrowKeyNotFound_WhenMemberDoesNotExist()
         {
-            // Test that deleting a non-existent member
-            // throws KeyNotFoundException with correct message
             _mockRepo.Setup(r => r.GetById(99)).Returns((Member?)null);
 
-            var ex = Assert.Throws<KeyNotFoundException>(() =>
-                _memberManager.DeleteMember(99));
-
+            var ex = Assert.Throws<KeyNotFoundException>(() => _memberManager.DeleteMember(99));
             Assert.Equal("Member with ID 99 was not found.", ex.Message);
         }
     }

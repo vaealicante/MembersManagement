@@ -1,56 +1,76 @@
 ﻿/**
- * dashboard.js - Logic for Management Dashboard
+ * dashboard.js
+ * Handles dashboard chart rendering
  */
+
 document.addEventListener("DOMContentLoaded", function () {
-    const ctx = document.getElementById('statusChart');
 
-    if (ctx) {
-        // Retrieve dynamic data from HTML data attributes
-        const activeCount = parseInt(ctx.getAttribute('data-active')) || 0;
-        const inactiveCount = parseInt(ctx.getAttribute('data-inactive')) || 0;
+    const chartCanvas = document.getElementById("statusChart");
 
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Active', 'Inactive'],
-                datasets: [{
-                    data: [activeCount, inactiveCount],
-                    backgroundColor: [
-                        '#198754', // Success Green
-                        '#adb5bd'  // Muted Gray
-                    ],
-                    borderWidth: 0,
-                    hoverOffset: 12
-                }]
-            },
-            options: {
-                cutout: '75%', // Creates a thinner, modern doughnut look
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            boxWidth: 12,
-                            padding: 20,
-                            font: {
-                                size: 12,
-                                weight: '500'
-                            }
+    // Stop if chart element doesn't exist
+    if (!chartCanvas) return;
+
+    // Get values from Razor data attributes
+    const activeCount = parseInt(chartCanvas.dataset.active) || 0;
+    const inactiveCount = parseInt(chartCanvas.dataset.inactive) || 0;
+
+    const totalMembers = activeCount + inactiveCount;
+
+    // Initialize Chart
+    new Chart(chartCanvas, {
+        type: "doughnut",
+        data: {
+            labels: ["Active Members", "Inactive Members"],
+            datasets: [{
+                data: [activeCount, inactiveCount],
+                backgroundColor: [
+                    "#198754", // Bootstrap success
+                    "#adb5bd"  // muted gray
+                ],
+                borderWidth: 0,
+                hoverOffset: 12
+            }]
+        },
+        options: {
+
+            // Modern doughnut look
+            cutout: "75%",
+
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+                    position: "bottom",
+                    labels: {
+                        boxWidth: 12,
+                        padding: 20,
+                        font: {
+                            size: 12,
+                            weight: "500"
                         }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                const total = activeCount + inactiveCount;
-                                const value = context.raw;
-                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                return ` ${context.label}: ${value} (${percentage}%)`;
-                            }
+                    }
+                },
+
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+
+                            const value = context.raw;
+
+                            const percentage =
+                                totalMembers > 0
+                                    ? ((value / totalMembers) * 100).toFixed(1)
+                                    : 0;
+
+                            return `${context.label}: ${value} (${percentage}%)`;
                         }
                     }
                 }
+
             }
-        });
-    }
+        }
+    });
+
 });

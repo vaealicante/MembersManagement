@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MembersManagement.Infrastructure.Migrations
 {
     [DbContext(typeof(MemberDbContext))]
-    [Migration("20260219083225_InitialMembershipSchema")]
-    partial class InitialMembershipSchema
+    [Migration("20260416081521_AddNewChanges")]
+    partial class AddNewChanges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -90,7 +90,7 @@ namespace MembersManagement.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MembershipId")
+                    b.Property<int?>("MembershipId")
                         .HasColumnType("int");
 
                     b.HasKey("MemberID");
@@ -135,8 +135,7 @@ namespace MembersManagement.Infrastructure.Migrations
                     b.HasOne("MembersManagement.Domain.DomMembershipModule.MembershipEntities.Membership", "Membership")
                         .WithMany()
                         .HasForeignKey("MembershipId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Branch");
 
